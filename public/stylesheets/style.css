@@ -1,0 +1,26 @@
+body {
+  padding: 0px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#content{
+  margin-top: 30px;
+  margin-bottom: 20px;
+  min-height: 25rem;
+}
+
+footer{
+  position: relative;
+  bottom: 0;d
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.page-footer{
+  margin-top: 10rem;
+}

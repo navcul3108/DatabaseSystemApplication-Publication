@@ -1,0 +1,77 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Query"
+
+block content
+      .form-group
+        label Enter your SQL statement
+        input.form-control(name="sqlstatement" id="sql-input")
+      button.btn.btn-danger(onclick="query()") Execute
+      
+      .result(style="overflow-x:auto")
+
+      script.
+        function query(){
+          const sqlStatement = $("#sql-input").val();
+          if (sqlStatement != undefined || sqlStatement != ""){
+            $.ajax({
+              url: '/query/execute',
+              type: "POST",
+              dataType: "json",
+              data: {statement: sqlStatement},
+              success: function(data){
+                if(data.message == "success"){
+                  if(data.table){
+                    console.log(data.table);
+                    $(".result table").remove();
+                    const tableCode = genTableHtmlCode(data.table);
+                    $(".result").html(tableCode);
+                  }
+                  else{
+                    $(".result div").remove();
+                    var rowsAffected = "";
+                    data.rowsAffected.forEach(rowsCount=>{
+                      rowsAffected += `<div class="text-info w-100">${rowsCount} rows affected</div>`;
+                    })
+                    $(".result").html(`<div class="text-info w-100">Execute successfully!</div>`+rowsAffected);
+                  }
+                }
+                else{
+                  $(".result a").remove();
+                  console.log(data.error);
+                  $(".result").html(`<a class="text-danger">Error: ${data.errorMessage}</a>`)
+                }
+              },
+              error: function () {
+                    alert("This is an error occurring in getting data");
+                }
+            })
+          }
+        }
+
+        function genTableHtmlCode(table){
+          const columns = table.columns;
+          const rows = table.rows;
+          var columnCode = "";
+          columns.forEach((column)=>{
+            columnCode += ('<th scope="col">'+column.name+"</th>");
+          })
+          var bodyCode = ""
+          rows.forEach((row)=>{
+            bodyCode += '<tr>'
+            row.forEach((column)=>{
+              bodyCode += "<td>"+column+"</td>";
+            })
+            bodyCode += '</tr>'
+          })
+          var tableCode = `<table class="table table-striped">
+                           <thead class="thead-dark">
+                              ${columnCode}
+                           </thead>
+                           <tbody>
+                              ${bodyCode}
+                           </tbody>
+                          </table>`;
+          return tableCode;
+        }

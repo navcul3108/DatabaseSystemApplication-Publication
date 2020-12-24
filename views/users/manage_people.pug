@@ -1,0 +1,70 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Manage peoples"
+
+block content
+      h2.text-info All people
+      table.table.table-stripped
+        thead.thead-dark
+          th ID
+          th First Name
+          th Last Name
+          th Email
+          th Roles
+        tbody#people-table
+
+      script.
+        function loadInfomations(){
+          $.ajax({
+            method: "GET",
+              url: "all-user",
+              dataType: "json",
+              data: {},
+              success: function(data){
+                $("#people-table tr").remove();
+                let tableContent = "";
+                console.log(data);
+
+                let allUsers = JSON.parse(data.users);
+                let allGroups = JSON.parse(data.groups);
+                let selectCode = `<select>
+                                  ${allGroups.map(group => {return `<option value="${group.id}">${group.groupName}</option>`})}
+                                  </select>`
+
+                allUsers.forEach((user)=>{
+                  let id = user.id;
+                  let profile = user.profile;
+                  let groups = user.groups.filter(group=>group.profile.name);
+                  let curGroup;
+                  if(groups.length == 0)
+                    curGroup = "Khách";
+                  else
+                    curGroup = groups[0];
+                  const rowCode = ` <tr>
+                                    <td>${id}</td>
+                                    <td>${profile.firstName}</td>
+                                    <td>${profile.lastName}</td>
+                                    <td>${profile.email}</td>
+                                    <td>${selectCode}</td>
+                                  </tr>`;
+                                   
+                  tableContent += rowCode;                 
+                })
+                $("#people-table").html(tableContent);
+                let options = $("option")''
+                allUsers.forEach(user => {
+                  options.each(option => {
+                    if(option.value == user.id)
+                      option.attr()
+                  })
+                })
+              },
+              error: function () {
+                    alert("This is an error occurring in getting data");
+              }
+          })
+        }
+        $(document).on("ready", loadInfomations());
+
+

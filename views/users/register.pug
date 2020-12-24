@@ -1,0 +1,14 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Register Page"
+
+block content
+      .d-flex.flex-row.justify-content-center
+        .col-lg-6
+          form(action="/users/register", method="post")
+            each field in fields
+              .form-group
+                label(for='#{field.name}')= field.label
+                input.form-control(type=field.type name=field.name required)
+            button.btn.btn-success(type="submit") Submit
