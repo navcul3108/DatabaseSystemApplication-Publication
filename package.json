@@ -5,6 +5,9 @@
   "scripts": {
     "start": "nodemon ./bin/www"
   },
+  "nodemonConfig": {
+    "ignore": ["public/*"]
+  },
   "dependencies": {
     "@okta/oidc-middleware": "^4.0.2",
     "@okta/okta-sdk-nodejs": "^4.3.1",

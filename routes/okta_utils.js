@@ -55,8 +55,8 @@ const getAllUsersAndGroups = async () => {
   await users.each(async (user) => {
     const url = "https://dev-6895187.okta.com/api/v1/users/" + user.id + "/groups";
     let assignableGroups = null;
-    let tacgiaAssignaleGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
-    let phanbienAssignaleGroups = allGroups.filter(group => group.groupName != "Phản biện");
+    let tacgiaAssignaleGroups = allGroups.filter(group => group.profile.name != "Biên tập" && group.profile.name!="Tác giả");
+    let phanbienAssignaleGroups = allGroups.filter(group => group.profile.name != "Phản biện");
     
     await oktaClient.http.http(url, oktaRequest)
       .then(res => res.text())
@@ -96,10 +96,10 @@ const getAllGroups = async () => {
       const json = JSON.parse(text);
       const notDefaultGroups = json.filter(group => group.profile.name != "Everyone" && group.profile.name != "Admin");
       groups = notDefaultGroups.map(group => {
-        return { id: group.id, groupName: group.profile.name }
+        return { id: group.id, profile: group.profile }
       });
     });
-  groups.push({id: '#', groupName: "Khách"});
+  groups.push({id: '#', profile: {name:"Khách"}});
   return groups;
 }
 

@@ -19,87 +19,76 @@ block content
 
       script(src="/javascripts/manage_people.js")
       script.
-        function compareUserByGroupName(user1, user2){
-          if(user1.groups.length ==0)
-              return -1;
-          else if(user2.groups.length == 0)
-              return 1;
-          else{
-              if(user1.groups[0].profile.name == user2.groups[0].profile.name)
-                  return 0;
-              else
-                  return user1.groups[0].profile.name > user2.groups[0].profile.name ? 1 : -1;
-          }
-        }
-        function loadInformations(){
-          $("table tbody>*").remove();
-          $.ajax({
-            method: "GET",
-              url: "all-user",
-              dataType: "json",
-              data: {},
-              success: function(data){
-                $("#people-table tr").remove();
-                const colors = {
-                  "Khách" : "text-secondary",
-                  "Biên tập": "text-success",
-                  "Tác giả": "text-danger",
-                  "Phản biện": "text-warning",
-                  "Admin": "text-primary"
-                }
+        $(document).on("ready", initialize());
+        //- function loadInformations(){
+        //-   $("table tbody>*").remove();
+        //-   $.ajax({
+        //-     method: "GET",
+        //-       url: "all-user",
+        //-       dataType: "json",
+        //-       data: {},
+        //-       success: function(data){
+        //-         $("#people-table tr").remove();
+        //-         const colors = {
+        //-           "Khách" : "text-secondary",
+        //-           "Biên tập": "text-success",
+        //-           "Tác giả": "text-danger",
+        //-           "Phản biện": "text-warning",
+        //-           "Admin": "text-primary"
+        //-         }
 
-                let tableContent = "";
+        //-         let tableContent = "";
 
-                let allUsers = JSON.parse(data.users);
-                allUsers.sort(compareUserByGroupName);
-                let allGroups = JSON.parse(data.groups);
+        //-         let allUsers = JSON.parse(data.users);
+        //-         allUsers.sort(compareUserByGroupName);
+        //-         let allGroups = JSON.parse(data.groups);
 
-                allUsers.forEach((user)=>{
-                  let id = user.id;
-                  let profile = user.profile;
-                  let groups = user.groups.filter(group=>group.profile.name);
-                  let assignableGroups = user.assignableGroups;
+        //-         allUsers.forEach((user)=>{
+        //-           let id = user.id;
+        //-           let profile = user.profile;
+        //-           let groups = user.groups.filter(group=>group.profile.name);
+        //-           let assignableGroups = user.assignableGroups;
                   
-                  const roleHtmlCode = genRoleHtmlCode(id, groups, assignableGroups, colors);
-                  const rowCode = genRowCode(id, profile, roleHtmlCode, assignableGroups);
+        //-           const roleHtmlCode = genRoleHtmlCode(id, groups, assignableGroups, colors);
+        //-           const rowCode = genRowCode(id, profile, roleHtmlCode, assignableGroups);
                                    
-                  tableContent += rowCode;                 
-                });
-                $("#people-table").html(tableContent);
+        //-           tableContent += rowCode;                 
+        //-         });
+        //-         $("#people-table").html(tableContent);
                 
-                allUsers.forEach((user) => {
-                  // Sử dụng hàm change để lưu giá trị trước khi thay đổi
-                  var selectTag = $(`#${user.id}`);
-                  $(selectTag).data("prev", $(selectTag).val());
-                  $(selectTag).change(()=>{
-                    $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
-                  })
-                })
-              },
-              error: function () {
-                    alert("This is an error occurring in getting data");
-              }
-          })
-        }
+        //-         allUsers.forEach((user) => {
+        //-           // Sử dụng hàm change để lưu giá trị trước khi thay đổi
+        //-           var selectTag = $(`#${user.id}`);
+        //-           $(selectTag).data("prev", $(selectTag).val());
+        //-           $(selectTag).change(()=>{
+        //-             $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
+        //-           })
+        //-         })
+        //-       },
+        //-       error: function () {
+        //-             alert("This is an error occurring in getting data");
+        //-       }
+        //-   })
+        //- }
 
-        function changeGroup(userId){
-            let selectTag = $(`#${userId}`);
-            const fromGroupId = $(selectTag).data("prev");
-            const toGroupId = $(selectTag).val();
+        //- function changeGroup(userId){
+        //-     let selectTag = $(`#${userId}`);
+        //-     const fromGroupId = $(selectTag).data("prev");
+        //-     const toGroupId = $(selectTag).val();
 
-            $.ajax({
-              method: "POST",
-              url: "change-group",
-              dataType: "json",
-              data: {userId: userId, fromGroupId: fromGroupId, toGroupId: toGroupId},
-              success: () =>{
-                 $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", true);
-                 loadInformations();
-              },
-              error: () =>{
-                alert("Can not change group for this account!");
-              } 
-            })
-        }
-        $(document).on("ready", loadInformations());
+        //-     $.ajax({
+        //-       method: "POST",
+        //-       url: "change-group",
+        //-       dataType: "json",
+        //-       data: {userId: userId, fromGroupId: fromGroupId, toGroupId: toGroupId},
+        //-       success: () =>{
+        //-          $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", true);
+        //-          loadInformations();
+        //-       },
+        //-       error: () =>{
+        //-         alert("Can not change group for this account!");
+        //-       } 
+        //-     })
+        //- }
+        
 
