@@ -2,7 +2,7 @@ const sql = require("mssql/msnodesqlv8");
 const express = require("express");
 var router = express.Router();
 
-const dbConfig = require("../data_access/database_config");
+const dbConfig = require("../data_access/database_utils");
 var dataAccess = require("../data_access/user_query");
 
 let config = dbConfig.config;

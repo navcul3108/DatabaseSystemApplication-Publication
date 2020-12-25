@@ -1,4 +1,5 @@
-sql = require("mssql/msnodesqlv8");
+const sql = require("mssql/msnodesqlv8");
+const dbUtils = require("./database_utils");
 require("dotenv").config();
 
 var config = {
@@ -55,6 +56,7 @@ const registerNewUser = (id, email, password, firstName, lastName) =>{
 }
 
 const changeGroup = async (userId, fromGroupName, toGroupName) => {
+    console.log(toGroupName);
     let tableName = null;
     let error = null;
     switch(toGroupName){
@@ -64,39 +66,18 @@ const changeGroup = async (userId, fromGroupName, toGroupName) => {
         case "Tác giả" : 
             tableName = "TACGIA";
             break;
-        case "Phản biên" : 
+        case "Phản biện" : 
             tableName = "PHANBIEN";
             break;
         default : throw Error("Cannot change this account to group "+ toGroupName)
     }
 
-    var conn = new sql.ConnectionPool(config, (err)=>{
-        if(err != null)
-            console.log("Error while setting connection to database ", err)
-    });
+    const sqlStatement = `Insert Into ${tableName}(SSN)
+                            Values((Select SSN From ACCOUNT_NHAKHOAHOC Where ID = '${userId}'));`;
+    console.log(sqlStatement);
+    const successMsg = "Change group in database successfully!";
 
-    await conn.connect().then(async ()=>{
-        const sqlStatement = `Insert Into ${tableName}(SSN)
-                        Values((Select SSN From ACCOUNT_NHAKHOAHOC Where ID = '${userId}'));`;
-        let request = new sql.Request(conn);
-        await request.query(sqlStatement)
-        .then((result)=>{
-            console.log("Change group in database successfully!");
-        })
-        .catch(err => {
-            console.log(err)
-            error = err;
-        })
-    })
-    .catch(err => {
-        console.log(err);
-        error = err;
-    })
- 
-    if(error == null)
-        return true;
-    else
-        return false;
+    return await dbUtils.queryDatabase(config, sqlStatement, successMsg);
 }
 
 module.exports = {

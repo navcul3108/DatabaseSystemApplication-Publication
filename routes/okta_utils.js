@@ -55,7 +55,9 @@ const getAllUsersAndGroups = async () => {
   await users.each(async (user) => {
     const url = "https://dev-6895187.okta.com/api/v1/users/" + user.id + "/groups";
     let assignableGroups = null;
-
+    let tacgiaAssignaleGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
+    let phanbienAssignaleGroups = allGroups.filter(group => group.groupName != "Phản biện");
+    
     await oktaClient.http.http(url, oktaRequest)
       .then(res => res.text())
       .then(text => {
@@ -67,11 +69,11 @@ const getAllUsersAndGroups = async () => {
           assignableGroups = allGroups;
         else if(groups.length == 1){
           if(groups[0].profile.name == "Tác giả")
-            assignableGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
+            assignableGroups = tacgiaAssignaleGroups;
           else if(groups[0].profile.name == "Biên tập")
-            assignableGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
+            assignableGroups = tacgiaAssignaleGroups;// the same as author
           else if(groups[0].profile.name == "Phản biện")
-            assignableGroups = allGroups.filter(group => group.groupName != "Phản biện");
+            assignableGroups = phanbienAssignaleGroups;
         }
       
         listUsers.push({ id: user.id, profile: user.profile, groups: groups, assignableGroups: assignableGroups });
@@ -79,7 +81,7 @@ const getAllUsersAndGroups = async () => {
       .catch(err => console.log(err));
   })
   .catch(err => console.log(err));
-  listUsers.sort(compareUserByGroupName);
+  //listUsers.sort(compareUserByGroupName);
   const result = {allUsers: JSON.stringify(listUsers), allGroups: JSON.stringify(allGroups)};
 
   return result;
