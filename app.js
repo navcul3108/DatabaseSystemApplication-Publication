@@ -7,6 +7,7 @@ var session = require("express-session")
 var oktaUtils = require("./routes/okta_utils");
 var userRouter = require('./routes/users');
 var queryRouter = require("./routes/query");
+var adminRouter = require("./routes/admin");
 
 var app = express();
 
@@ -84,6 +85,7 @@ app.use(oidc.router);
 
 app.use('/users', userRouter);
 app.use("/query", queryRouter);
+app.use("/admin", adminRouter);
 
 app.get('/', (req, res) => {
   res.render('home/index');

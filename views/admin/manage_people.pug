@@ -1,0 +1,120 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Manage peoples"
+
+block content
+      h2.text-info All people
+      table.table.table-striped
+        thead.thead-dark
+          th ID
+          th First Name
+          th Last Name
+          th Email
+          th Role
+          th Save changes
+        tbody#people-table
+
+      script.
+        function loadInformations(){
+          $("table tbody>*").remove();
+          $.ajax({
+            method: "GET",
+              url: "all-user",
+              dataType: "json",
+              data: {},
+              success: function(data){
+                $("#people-table tr").remove();
+                const colors = {
+                  "Khách" : "text-secondary",
+                  "Biên tập": "text-success",
+                  "Tác giả": "text-danger",
+                  "Phản biện": "text-warning",
+                  "Admin": "text-primary"
+                }
+
+                let tableContent = "";
+
+                console.log(data);
+                let allUsers = JSON.parse(data.users);
+                let allGroups = JSON.parse(data.groups);
+
+                allUsers.forEach((user)=>{
+                  let id = user.id;
+                  let profile = user.profile;
+                  let groups = user.groups.filter(group=>group.profile.name);
+                  let assignableGroups = user.assignableGroups;
+                  let roleHtmlCode = null;
+                  if(groups.length == 0){
+                    roleHtmlCode = `<select id="${id}">
+                                  ${assignableGroups.map(group => {return `<option value="${group.id}">${group.groupName}</option>`})}
+                                  </select>`;
+                    roleHtmlCode = roleHtmlCode.replace('value="#"', 'value="#" selected');
+                  }
+                  else if(groups.length == 1 && assignableGroups != null){
+                    roleHtmlCode = `<div class="row">
+                                      <div class="col-sm-4"><a class="font-weight-bold d-inline ${colors[groups[0].profile.name]}">${groups[0].profile.name}</a></div>
+                                      <div class="col-sm-8">
+                                        <select id="${id}" hidden>
+                                          ${assignableGroups.map(group => {return `<option value="${group.id}">${group.groupName}</option>`})}
+                                        </select>
+                                        <a class="d-inline btn btn-primary btn-sm">Assign new role</a>
+                                      </div>`
+                  }
+                  else{
+                    roleHtmlCode = `${groups.map(group => `<a class="font-weight-bold ${colors[groups[0].profile.name]}">${group.profile.name}</a>`)}`;
+                  }
+                  
+                  const rowCode = ` <tr>
+                                    <td>${id}</td>
+                                    <td>${profile.firstName}</td>
+                                    <td>${profile.lastName}</td>
+                                    <td>${profile.email}</td>
+                                    <td>${roleHtmlCode}</td>
+                                    <td class="saveChange">
+                                      ${assignableGroups==null? "": `<button class="btn btn-primary btn-sm" onclick="changeGroup('${id}')" disabled>Save changes</button>`}
+                                      </td>
+                                  </tr>`;
+                                   
+                  tableContent += rowCode;                 
+                });
+                $("#people-table").html(tableContent);
+                
+                allUsers.forEach((user) => {
+                  // Sử dụng hàm change để lưu giá trị trước khi thay đổi
+                  var selectTag = $(`#${user.id}`);
+                  console.log($(selectTag).val());
+                  $(selectTag).data("prev", $(selectTag).val());
+                  $(selectTag).change(()=>{
+                    $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
+                  })
+                })
+              },
+              error: function () {
+                    alert("This is an error occurring in getting data");
+              }
+          })
+        }
+
+        function changeGroup(userId){
+            let selectTag = $(`#${userId}`);
+            const fromGroupId = $(selectTag).data("prev");
+            const toGroupId = $(selectTag).val();
+
+            $.ajax({
+              method: "POST",
+              url: "change-group",
+              dataType: "json",
+              data: {userId: userId, fromGroupId: fromGroupId, toGroupId: toGroupId},
+              success: () =>{
+                alert("Change group successfully");
+                 $(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", true);
+                 loadInformations();
+              },
+              error: () =>{
+                alert("Can not change group for this account!");
+              } 
+            })
+        }
+        $(document).on("ready", loadInformations());
+

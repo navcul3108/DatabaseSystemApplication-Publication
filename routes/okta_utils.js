@@ -34,25 +34,55 @@ const oktaRequest = {
   }
 };
 
-const getAllUsers = async () => {
+const compareUserByGroupName = (user1, user2)=>{
+  if(user1.groups.length ==0)
+      return -1;
+  else if(user2.groups.length == 0)
+      return 1;
+  else{
+      if(user1.groups[0].profile.name == user2.groups[0].profile.name)
+          return 0;
+      else
+          return user1.groups[0].profile.name > user2.groups[0].profile.name ? 1 : -1;
+  }
+}
+
+const getAllUsersAndGroups = async () => {
   let listUsers = [];
   let users = oktaClient.listUsers();
+  const allGroups = await getAllGroups();
 
   await users.each(async (user) => {
     const url = "https://dev-6895187.okta.com/api/v1/users/" + user.id + "/groups";
+    let assignableGroups = null;
 
     await oktaClient.http.http(url, oktaRequest)
       .then(res => res.text())
       .then(text => {
         const json = JSON.parse(text);
         const groups = json.filter(group => group.profile.name != "Everyone");
-        listUsers.push({ id: user.id, profile: user.profile, groups: groups });
+        assignableGroups = null
+
+        if(groups.length == 0)
+          assignableGroups = allGroups;
+        else if(groups.length == 1){
+          if(groups[0].profile.name == "Tác giả")
+            assignableGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
+          else if(groups[0].profile.name == "Biên tập")
+            assignableGroups = allGroups.filter(group => group.groupName != "Biên tập" && group.groupName!="Tác giả");
+          else if(groups[0].profile.name == "Phản biện")
+            assignableGroups = allGroups.filter(group => group.groupName != "Phản biện");
+        }
+      
+        listUsers.push({ id: user.id, profile: user.profile, groups: groups, assignableGroups: assignableGroups });
       })
       .catch(err => console.log(err));
   })
   .catch(err => console.log(err));
+  listUsers.sort(compareUserByGroupName);
+  const result = {allUsers: JSON.stringify(listUsers), allGroups: JSON.stringify(allGroups)};
 
-  return JSON.stringify(listUsers);
+  return result;
 }
 
 const getAllGroups = async () => {
@@ -62,19 +92,89 @@ const getAllGroups = async () => {
     .then(res => res.text())
     .then(text => {
       const json = JSON.parse(text);
-      const notDefaultGroups = json.filter(group => group.profile.name != "Everyone" && group.profile.name!="Admin");
+      const notDefaultGroups = json.filter(group => group.profile.name != "Everyone" && group.profile.name != "Admin");
       groups = notDefaultGroups.map(group => {
         return { id: group.id, groupName: group.profile.name }
       });
     });
-  groups.push({id: '', groupName: "Khách"});
-  return JSON.stringify(groups);
+  groups.push({id: '#', groupName: "Khách"});
+  return groups;
+}
+
+const changeGroup = async (userId, fromGroupId, toGroupId) =>{
+  let error = null;
+  if(fromGroupId!="#"){
+    const url = `https://dev-6895187.okta.com/api/v1/groups/${fromGroupId}/users/${userId}`;
+
+    let deleteRequest =  {
+      method: "DELETE",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      }
+    };  
+
+    await oktaClient.http.http(url, deleteRequest)
+    .then(res => {console.log("Delete user from group successfully!")})
+    .catch(err => {
+      error = err;
+      console.log(err);
+    });
+  }
+      
+  if(toGroupId!="#"){
+    const url = `https://dev-6895187.okta.com/api/v1/groups/${toGroupId}/users/${userId}`;
+
+    let putRequest =  {
+      method: "PUT",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      }
+    };  
+
+    await oktaClient.http.http(url, putRequest)
+    .then(res => {console.log("Add user to group successfully!")})
+    .catch(err => {
+      error = err;
+      console.log(err);
+    });
+  }
+  if(error==null)
+    return true;
+  else
+    return false;
+}
+
+const removeFromGroup = async (userId, groupId) =>{
+  let error = null;
+  const url = `https://dev-6895187.okta.com/api/v1/groups/${groupId}/users/${userId}`;
+  let deleteRequest =  {
+    method: "DELETE",
+    headers: {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    }
+  };  
+
+  await oktaClient.http.http(url, deleteRequest)
+  .then(res => {console.log("Delete user from group successfully!")})
+  .catch(err => {
+    error = err;
+    console.log(err);
+  });
+  if(error == null)
+    return true;
+  else
+    return false;
 }
 
 module.exports = {
   oktaClient: oktaClient,
   oidc: oidc,
   oktaRequest: oktaRequest,
-  getAllUsers: getAllUsers,
-  getAllGroups: getAllGroups
+  getAllUsersAndGroups: getAllUsersAndGroups,
+  getAllGroups: getAllGroups,
+  changeGroup: changeGroup,
+  removeFromGroup: removeFromGroup
 }

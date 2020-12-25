@@ -1,7 +1,6 @@
 const express = require("express");
 const okta = require("@okta/okta-sdk-nodejs");
 const oktaUtils = require("./okta_utils");
-const { route } = require("./query");
 const userQuery = require("../data_access/user_query");
 require("dotenv").config();
 
@@ -55,35 +54,5 @@ router.get('/profile', (req, res)=>{
   }
 });
 
-router.get("/manage-people", (req, res)=>{
-  if(req.session.groups != null)
-  {
-    if(req.session.isAdmin)
-    {
-      res.render("users/manage_people");
-      return
-    }
-  }
-  res.render("unauthenticated");  
-})
-
-// Page that admin assign role for a user
-router.get("/all-user", async (req, res)=>{
-  if(req.session.groups != null)
-  {
-    if(req.session.isAdmin)
-    {
-        const allUsers = await oktaUtils.getAllUsers();
-        const allGroups = await oktaUtils.getAllGroups();
-
-        res.json({users: allUsers, groups: allGroups});
-      }
-    else{
-      res.render("unauthenticated");
-    }
-  }
-  else
-    res.redirect("/");
-})
 
 module.exports = router;
