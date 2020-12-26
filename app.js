@@ -3,11 +3,16 @@ var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var session = require("express-session")
+var userQuery = require("./data_access/user_query");
 
 var oktaUtils = require("./routes/okta_utils");
 var userRouter = require('./routes/users');
 var queryRouter = require("./routes/query");
+
 var adminRouter = require("./routes/admin");
+var authorRouter = require("./routes/author");
+var editorRouter = require("./routes/editor");
+var reviewerRouter = require("./routes/reviewer");
 
 var app = express();
 
@@ -35,6 +40,7 @@ app.use((req, res, next) => {
   {
     req.session.user = null;
     req.session.groups = null;
+    req.session.ssn = null;
     return next();
   }
   if (req.session.passport==undefined || req.session.passport.user==undefined) {
@@ -67,13 +73,15 @@ app.use((req, res, next) => {
 
       oktaClient.http.http(url, oktaUtils.oktaRequest)
         .then(res=> res.text())
-        .then(text => {
+        .then(async (text) => {
           const json = JSON.parse(text);
           const groups = json.filter(group => group.profile.name != "Everyone");
           const isAdmin = json.some(group => group.profile.name=="Admin");
           req.session.groups = groups;
           req.session.isAdmin = isAdmin;
           res.locals.isAdmin = isAdmin;
+
+          req.session.ssn = await userQuery.getSSN(userId);
           next();
         })
         .catch(err=> next(err));
@@ -86,6 +94,9 @@ app.use(oidc.router);
 app.use('/users', userRouter);
 app.use("/query", queryRouter);
 app.use("/admin", adminRouter);
+app.use("/author", authorRouter);
+app.use("/editor", editorRouter);
+app.use("/reviewer", reviewerRouter);
 
 app.get('/', (req, res) => {
   res.render('home/index');

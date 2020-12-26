@@ -1,0 +1,22 @@
+extends ../shared_profile.pug
+
+block variables
+  -var groupAlias = 'editor'
+
+block groupProfile
+            .card
+              .card-header.bg-secondary
+                h2.text-white.d-inline Biên tập
+                button.d-inline.float-right.btn.btn-info
+                  span
+                    i.fa.fa-2x.fa-edit
+              .card-body
+                form(action="update-profile", method="post")#author-profile-form.w-100
+                  .form-group.w-100
+                      label(for='email') Email
+                      input.form-control(type='email' name="email" value='')
+                  .d-flex.justify-content-end
+                      button.btn.btn-success.mr-2(type='submit') Save
+                      button.btn.btn-danger.mr-2 Cancel
+
+   

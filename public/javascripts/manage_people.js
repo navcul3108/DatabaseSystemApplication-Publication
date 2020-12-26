@@ -143,3 +143,5 @@ function compareUserByGroupName(user1, user2){
 			return user1.groups[0].profile.name > user2.groups[0].profile.name ? 1 : -1;
 	}
 }
+
+$(document).on("ready", initialize());

@@ -13,9 +13,10 @@ var config = {
     password: process.env.adminpassword
 };
 
-const getSSNStatement = (account_id)=>{
-    if(typeof account_id == String)
-        return `SELECT ESSN FROM ACCOUNT_NHAKHOAHOC WHERE ID = '${account_id}'`;
+const getSSN = async (userId)=>{
+    const sqlStatement = `Select SSN From ACCOUNT_NHAKHOAHOC WHERE ID = '${userId}';`;
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    return table.rows[0][0].toString();
 }
 
 const registerNewUser = (id, email, password, firstName, lastName) =>{
@@ -56,7 +57,6 @@ const registerNewUser = (id, email, password, firstName, lastName) =>{
 }
 
 const changeGroup = async (userId, fromGroupName, toGroupName) => {
-    console.log(toGroupName);
     let tableName = null;
     let error = null;
     switch(toGroupName){
@@ -80,8 +80,35 @@ const changeGroup = async (userId, fromGroupName, toGroupName) => {
     return await dbUtils.queryDatabase(config, sqlStatement, successMsg);
 }
 
+const getProfileOfScientist = async(userId) =>{
+    const sqlStatement = `Select HO, TEN, DIACHI, COQUANCONGTAC, NGHE, DIENTHOAI From ACCOUNT_NHAKHOAHOC
+                           Where ID = '${userId}'`;
+    const successMsg = "Get infromation of user whose id is " + userId;
+
+    const table = (await dbUtils.queryDatabase(config, sqlStatement, successMsg, true));
+    if(table.rows.length >0)
+    {
+        const row = table.rows[0];
+        return {firstName: row[0], lastName: row[1], address: row[2], workingPlace: row[3],job: row[4], telephone: row[5]};
+    }
+    else
+        return {firstName: '', lastName: '', address: '', workingPlace: '',job: '', telephone: ''}
+} 
+
+const updateScientistProfile = async(ssn, firstName, lastName, address, workingPlace, job, telephone) =>{
+    const sqlStatement = `Update NHAKHOAHOC
+                         SET HO='${firstName}', TEN='${lastName}', DIACHI='${address}',
+                            COQUANCONGTAC='${workingPlace}', NGHE='${job}', DIENTHOAI='${telephone}'
+                         WHERE SSN='${ssn}'`;
+    console.log(sqlStatement);
+    const successMsg = "Update profile of scientist successfully!";
+    return await dbUtils.queryDatabase(config, sqlStatement, successMsg); 
+}
+
 module.exports = {
-    getSSN: getSSNStatement, 
+    getSSN: getSSN, 
     registerNewUser: registerNewUser,
-    changeGroup: changeGroup
+    changeGroup: changeGroup,
+    getProfileOfScientist: getProfileOfScientist,
+    updateScientistProfile: updateScientistProfile
 }

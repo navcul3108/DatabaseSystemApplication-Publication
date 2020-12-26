@@ -6,39 +6,47 @@ require('dotenv').config();
  * @param {mssqlConfig} config
  * @param {string} sqlStatement
  * @param {string} successMsg
- * @return {boolean} True if success otherwise false 
+ * @return If returnTable is True, return recordset, else return true if success else false
  */
-const queryDatabase = async (config, sqlStatement, successMsg) =>{
-    var conn = new sql.ConnectionPool(config, (err)=>{
-        if(err != null)
+const queryDatabase = async (config, sqlStatement, successMsg, returnTable = false) => {
+    var conn = new sql.ConnectionPool(config, (err) => {
+        if (err != null)
             console.log("Error while setting connection to database ", err)
     });
     let error = null;
+    let result = null;
 
-    await conn.connect().then(async ()=>{
+    await conn.connect()
+        .then(async () => {
         let request = new sql.Request(conn);
-        request.query(sqlStatement)
-        .then(async ()=>{
-            console.log(successMsg);
+        await request.query(sqlStatement)
+            .then((res) => {
+                if(returnTable && res.recordset)
+                    result = res.recordset.toTable();
+                console.log(successMsg);
+            })
+            .catch(err => {
+                error = err;
+                console.log(err);
+            })
         })
         .catch(err => {
-            error=err;
+            error = err;
             console.log(err);
         })
-    })
-    .catch(err => {
-        error=err;
-        console.log(err);
-    })
-
-    if(error == null)
-        return true;
-    else
-        return false;
+    if (returnTable) {
+        return result;
+    }
+    else {
+        if (error == null)
+            return true;
+        else
+            return false;
+    }
 }
 
 module.exports = {
-    config : {
+    config: {
         server: 'DESKTOP-DVVFCRT\\SQLEXPRESS',
         database: "TAPCHI",
         driver: "msnodesqlv8",
@@ -46,14 +54,14 @@ module.exports = {
             trustedConnection: false
         }
     },
-    databaseLogin : {
+    databaseLogin: {
         "Biên tập": { user: process.env.bientaplogin, password: process.env.bientappassword },
         "Tác giả": { user: process.env.tacgialogin, password: process.env.tacgiapassword },
         "Phản biện": { user: process.env.phanbienlogin, password: process.env.phanbienpassword }
     },
-    defaultLogin : {
-        user:  process.env.khachlogin,
-        password:  process.env.khachpassword
+    defaultLogin: {
+        user: process.env.khachlogin,
+        password: process.env.khachpassword
     },
-    queryDatabase : queryDatabase
+    queryDatabase: queryDatabase
 }

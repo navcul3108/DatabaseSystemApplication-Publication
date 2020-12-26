@@ -34,19 +34,6 @@ const oktaRequest = {
   }
 };
 
-const compareUserByGroupName = (user1, user2)=>{
-  if(user1.groups.length ==0)
-      return -1;
-  else if(user2.groups.length == 0)
-      return 1;
-  else{
-      if(user1.groups[0].profile.name == user2.groups[0].profile.name)
-          return 0;
-      else
-          return user1.groups[0].profile.name > user2.groups[0].profile.name ? 1 : -1;
-  }
-}
-
 const getAllUsersAndGroups = async () => {
   let listUsers = [];
   let users = oktaClient.listUsers();
