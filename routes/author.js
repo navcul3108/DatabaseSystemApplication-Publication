@@ -1,9 +1,28 @@
 const express = require("express");
 const authorQuery = require("../data_access/author_query");
 const articleQuery = require("../data_access/article_query");
+const multer = require("multer");
+const fs = require("fs");
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+		const folderDir = `./public/articles/${req.session.user?req.session.user.id+'/':''}`;
+		if(!fs.existsSync(folderDir))
+			fs.mkdirSync(folderDir);
+		cb(null, folderDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+      const fileName = file.originalname.split(".")[0], extend= file.originalname.split(".")[1];
+      cb(null, fileName + '-' + uniqueSuffix + '.' +extend);
+    }
+})
+
+var upload = multer({dest: "./public/tempor/", storage: storage});
 require("dotenv").config();
 
 var router = express.Router();
+
 
 router.post("/update-profile", async (req, res) => {
     const { body } = req;
@@ -25,7 +44,7 @@ router.get("/post-article", async (req, res) => {
     res.render("author/post-article", { otherAuthors: otherAuthors });
 })
 
-router.post("/post-article", async (req, res) => {
+router.post("/post-article", upload.single("articleFile"),async (req, res) => {
     const sendingDate = new Date().toISOString();
     const contactSsn = req.session.ssn;
     const { body } = req;
@@ -38,25 +57,30 @@ router.post("/post-article", async (req, res) => {
 
     switch (type) {
         case "research": {
-            const result = await articleQuery.postResearchArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, body.file, sendingDate);
+            const result = await articleQuery.postResearchArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, req.file.filename, sendingDate);
             if (result)
                 res.render("success", {message: "Bạn đã đăng bài thành công"});
-            else
-                res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+            else{
+				fs.unlinkSync(req.path);
+				res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+			}
             break;
         }
         case "overview": {
-            const result = await articleQuery.postOverviewArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, body.fileName, sendingDate);
+            const result = await articleQuery.postOverviewArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, req.file.filename, sendingDate);
             if (result)
                 res.render("success", {message: "Bạn đã đăng bài thành công"});
-            else
-                res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+			else
+			{
+				fs.unlinkSync(req.path);
+				res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+			}
             break;
         }
         case "review": {
             const bookName = body.bookName,
                 ISBN = body.isbn,
-                publisher = body.publiser,
+                publisher = body.publisher,
                 publishYear = body.publishYear,
                 numberPage = body.numberPage;
             let authorNames = body.bookAuthorName;
@@ -65,11 +89,13 @@ router.post("/post-article", async (req, res) => {
                 authorNames = [authorNames];
 
 
-            const result = await articleQuery.postReviewArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, body.fileName, sendingDate, bookName, ISBN, authorNames, publisher, publishYear, numberPage);
+            const result = await articleQuery.postReviewArticle(contactSsn, authorSSNs, body.title, body.brief, keywords, req.file.filename, sendingDate, bookName, ISBN, authorNames, publisher, publishYear, numberPage);
             if (result)
                 res.render("success", {message: "Bạn đã đăng bài thành công"});
-            else
-                res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+            else{
+				fs.unlinkSync(req.file.path);
+				res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
+			}
             break;
         }
     }

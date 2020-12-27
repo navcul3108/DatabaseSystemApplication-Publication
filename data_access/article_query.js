@@ -124,6 +124,10 @@ const postReviewArticle = async (contactSSN, authorSSNs, title, brief, keywords,
     }
 }
 
+const viewPostedArticle = async (ssn) =>{
+    
+}
+
 module.exports = {
     postResearchArticle: postResearchArticle,
     postOverviewArticle: postOverviewArticle,

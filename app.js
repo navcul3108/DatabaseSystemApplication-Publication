@@ -14,10 +14,14 @@ var authorRouter = require("./routes/author");
 var editorRouter = require("./routes/editor");
 var reviewerRouter = require("./routes/reviewer");
 
+var publicRouter = require("./routes/public");
+
 var app = express();
 
 var oktaClient = oktaUtils.oktaClient;
 const oidc = oktaUtils.oidc;
+
+global.approot = path.resolve(__dirname);
 
 app.get('/protected', oidc.ensureAuthenticated(), (req, res) => {
   res.send(JSON.stringify(req.userContext.userinfo));
@@ -150,6 +154,7 @@ app.use("/admin", adminRouter);
 app.use("/author", authorRouter);
 app.use("/editor", editorRouter);
 app.use("/reviewer", reviewerRouter);
+app.use("/public", publicRouter);
 
 app.get('/', (req, res) => {
   res.render('home/index');

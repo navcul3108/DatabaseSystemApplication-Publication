@@ -8,7 +8,7 @@ block content
         .card-header.bg-primary
           h2 Chỉnh sửa thông tin bài báo
         .card-body
-          form(action='#' method='POST' id="post-article-form")
+          form(action='#' method='POST' id="post-article-form" enctype="multipart/form-data")
             .form-group
               label Loại bài báo
               select#article-type.form-control.mb-3(name='type' required)
@@ -41,7 +41,7 @@ block content
                   button.btn.btn-sm.btn-danger.d-inline-block(type="button" onclick="removeKeyword(this)")
             .form-group
               label(for='file') File bài báo
-              input.form-control-file(type='file' name='file' id="FileUploader"  required)
+              input.form-control-file(type='file' name='articleFile' id="FileUploader" required)
             #submit-btn.d-flex.justify-content-end.mt-2
               button.btn.btn-success.mr-3(type='submit') Đăng bài
               button.btn.btn-danger.mr-3(type='reset') Hủy

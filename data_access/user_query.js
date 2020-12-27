@@ -13,6 +13,13 @@ var config = {
     password: process.env.adminpassword
 };
 
+const userRole ={
+    author: "Tác giả",
+    reviewer: "Phản biện",
+    editor: "Biên tập",
+    admin: "Admin"
+}
+
 const getSSN = async (userId)=>{
     const sqlStatement = `Select SSN From ACCOUNT_NHAKHOAHOC WHERE ID = '${userId}';`;
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
@@ -113,5 +120,6 @@ module.exports = {
     registerNewUser: registerNewUser,
     changeGroup: changeGroup,
     getProfileOfScientist: getProfileOfScientist,
-    updateScientistProfile: updateScientistProfile
+    updateScientistProfile: updateScientistProfile,
+    userRole : userRole
 }
