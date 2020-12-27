@@ -47,17 +47,18 @@ router.post("/change-group", async (req, res)=>{
     if(await oktaUtils.changeGroup(userId, fromGroupId, toGroupId))
     {
         const allGroups = await oktaUtils.getAllGroups();
-        const fromGroup = allGroups.filter(group => group.id == fromGroupId)
+        const fromGroup = allGroups.filter(group => group.id === fromGroupId)
         let fromGroupName = "Khách";
         if(fromGroup.length > 0)
             fromGroupName = fromGroup[0].profile.name;
         
-        const toGroup = allGroups.filter(group => group.id == toGroupId)
+        const toGroup = allGroups.filter(group => group.id === toGroupId)
         let toGroupName = "Khách";
-        if(fromGroup.length > 0)
+        if(toGroup.length > 0)
             toGroupName = toGroup[0].profile.name;
-    
-        if(await userQuery.changeGroup(userId, fromGroupName, toGroupName))
+        
+        let isSuccess = await userQuery.changeGroup(userId, fromGroupName, toGroupName); 
+        if(isSuccess)
             res.status(200).json("Ok");
         else
         {

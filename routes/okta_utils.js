@@ -37,7 +37,7 @@ const oktaRequest = {
 const getAllUsersAndGroups = async () => {
   let listUsers = [];
   let users = oktaClient.listUsers();
-  const allGroups = await getAllGroups();
+  let allGroups = await getAllGroups();
 
   await users.each(async (user) => {
     const url = "https://dev-6895187.okta.com/api/v1/users/" + user.id + "/groups";
@@ -68,8 +68,8 @@ const getAllUsersAndGroups = async () => {
       .catch(err => console.log(err));
   })
     .catch(err => console.log(err));
-  //listUsers.sort(compareUserByGroupName);
-  const result = { allUsers: JSON.stringify(listUsers), allGroups: JSON.stringify(allGroups) };
+    allGroups.push({ id: '#', profile: { name: "Khách" } });
+    const result = { allUsers: JSON.stringify(listUsers), allGroups: JSON.stringify(allGroups) };
 
   return result;
 }
@@ -86,7 +86,6 @@ const getAllGroups = async () => {
         return { id: group.id, profile: group.profile }
       });
     });
-  groups.push({ id: '#', profile: { name: "Khách" } });
   return groups;
 }
 
@@ -110,7 +109,7 @@ const getGroupsOfUser = async (userId) => {
 
 const changeGroup = async (userId, fromGroupId, toGroupId) => {
   let error = null;
-  if (fromGroupId != "#") {
+  if (fromGroupId != "#" && fromGroupId!=='' && fromGroupId!==null) {
     const url = `https://dev-6895187.okta.com/api/v1/groups/${fromGroupId}/users/${userId}`;
 
     let deleteRequest = {

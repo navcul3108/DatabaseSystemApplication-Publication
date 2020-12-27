@@ -14,15 +14,6 @@ function initialize(){
 			allGroups = JSON.parse(data.groups);
 			
 			renderTable(allUsers, allGroups);
-
-			allUsers.forEach((user) => {
-				// Sử dụng hàm change để lưu giá trị trước khi thay đổi
-				var selectTag = $(`#${user.id}`);
-				$(selectTag).data("prev", $(selectTag).val());
-				$(selectTag).change(()=>{
-				$(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
-				})
-			})
 		},
 		error: function () {
 			alert("This is an error occurring in getting data");
@@ -60,7 +51,11 @@ function renderTable(allUsers, allGroups){
 		var selectTag = $(`#${user.id}`);
 		$(selectTag).data("prev", $(selectTag).val());
 		$(selectTag).change(()=>{
-		$(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
+			if($(selectTag).parent(".col-sm-8").length>0){
+				$(selectTag).parent().parent().parent().siblings(".saveChange").children("button").prop("disabled", false);
+			}				
+			else
+				$(selectTag).parent().siblings(".saveChange").children("button").attr("disabled", false);
 		})
 	})
 }
@@ -80,8 +75,8 @@ function changeGroup(userId){
 		allUsers = allUsers.map(user =>{
 			if(user.id == userId)
 			{
-				user.groups.push(allGroups.filter(group => group.id == toGroupId)[0]);
-			}
+				user.groups.push(allGroups.filter(group => group.id === toGroupId)[0]);
+			}			
 			return user;
 		})
 		renderTable(allUsers, allGroups);
@@ -104,16 +99,16 @@ function genRoleHtmlCode(id, groups, assignableGroups, colors)
 	else if(groups.length == 1 && assignableGroups != null){
 		roleHtmlCode = `<div class="row">
 							<div class="col-sm-4"><a class="font-weight-bold d-inline ${colors[groups[0].profile.name]}">${groups[0].profile.name}</a></div>
-							<div class="col-sm-8">
-								<select id="${id}" hidden>
+							<div class="col-sm-8 d-inline">
+								<select id="${id}">
+									<option selected disabled value="#">Thêm vai trò</option>
 									${assignableGroups.map(group => {return `<option value="${group.id}">${group.profile.name}</option>`})}
 								</select>
-								<a class="d-inline btn btn-primary btn-sm">Assign new role</a>
 							</div>
 						</div>`
 	}
 	else{
-		roleHtmlCode = `${groups.map(group => `<a class="font-weight-bold ${colors[groups[0].profile.name]}">${group.profile.name}</a>`)}`;
+		roleHtmlCode = `${groups.map(group => `<a class="font-weight-bold mr-2 ${colors[group.profile.name]}">${group.profile.name}</a>`)}`;
 	}
 	return roleHtmlCode;
 }
@@ -126,7 +121,7 @@ function genRowCode(id, profile, roleHtmlCode, assignableGroups){
 				<td>${profile.email}</td>
 				<td>${roleHtmlCode}</td>
 				<td class="saveChange">
-				${assignableGroups==null? "": `<button class="btn btn-primary btn-sm" onclick="changeGroup('${id}')" disabled>Save changes</button>`}
+					${assignableGroups==null? "": `<button class="btn btn-primary btn-sm" onclick="changeGroup('${id}')" disabled>Save changes</button>`}
 				</td>
 			</tr>`
 }

@@ -16,7 +16,10 @@ var config = {
 const getSSN = async (userId)=>{
     const sqlStatement = `Select SSN From ACCOUNT_NHAKHOAHOC WHERE ID = '${userId}';`;
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
-    return table.rows[0][0].toString();
+    if(table.rows.length>0)
+        return table.rows[0][0].toString();
+    else
+        return null;
 }
 
 const registerNewUser = (id, email, password, firstName, lastName) =>{

@@ -1,5 +1,3 @@
-const { post } = require("../routes/author");
-const { queryDatabase } = require("./database_utils");
 const dbUtils = require("./database_utils");
 
 const articleState = {
