@@ -9,31 +9,44 @@ require('dotenv').config();
  * @return If returnTable is True, return recordset, else return true if success else false
  */
 const queryDatabase = async (config, sqlStatement, successMsg, returnTable = false) => {
+    sql.on("error", err => {
+        console.error(err);
+    })
     var conn = new sql.ConnectionPool(config, (err) => {
         if (err != null)
             console.log("Error while setting connection to database ", err)
     });
     let error = null;
     let result = null;
-
-    await conn.connect()
-        .then(async () => {
-        let request = new sql.Request(conn);
-        await request.query(sqlStatement)
-            .then((res) => {
-                if(returnTable && res.recordset)
-                    result = res.recordset.toTable();
-                console.log(successMsg);
+    try {
+        await conn.connect()
+            .then(async () => {
+                let request = new sql.Request(conn);
+                await request.query(sqlStatement)
+                    .then((res) => {
+                        if (returnTable && res.recordset)
+                            result = res.recordset.toTable();
+                        console.log(sqlStatement);
+                        console.log(successMsg);
+                    })
+                    .catch(err => {
+                        error = err;
+                        console.error(err);
+                    })
             })
             .catch(err => {
                 error = err;
-                console.log(err);
+                console.error(err);
             })
-        })
-        .catch(err => {
-            error = err;
-            console.log(err);
-        })
+    }
+    catch (err) {
+        console.error(err);
+        error = err;
+    }
+    finally {
+        conn.close();
+    }
+
     if (returnTable) {
         return result;
     }

@@ -34,7 +34,17 @@ const getProfile = async (ssn)=>{
         return null;
 }
 
+const getAllAuthorExceptMySelf = async (ssn)=>{
+    const sqlStatement = `Select SSN, HO +' '+ TEN FROM NHAKHOAHOC WHERE SSN IN (SELECT SSN FROM TACGIA WHERE SSN!='${ssn}');`;
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    if(table.rows.length > 0)
+        return table.rows.map(row => {return {ssn: row[0], fullName: row[1]};});
+    else
+        return [];
+}
+
 module.exports = {
     updateProfile: updateProfile,
-    getProfile: getProfile
+    getProfile: getProfile,
+    getAllAuthorExceptMySelf: getAllAuthorExceptMySelf
 }

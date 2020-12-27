@@ -1,0 +1,48 @@
+extends ../layout.pug
+
+block variables
+  -var title="Đăng bài"
+
+block content
+      .card
+        .card-header.bg-primary
+          h2 Chỉnh sửa thông tin bài báo
+        .card-body
+          form(action='#' method='POST' id="post-article-form")
+            .form-group
+              label Loại bài báo
+              select#article-type.form-control.mb-3(name='type' required)
+                option(disabled selected='') Lựa chọn thể loại
+                option(value='research') Nghiên cứu
+                option(value='review') Phản biện sách
+                option(value='overview') Tổng quan
+            .form-group
+              label(for='title') Tiêu đề
+              input.form-control(type='text' name="title" required)
+            .form-group
+              label(for='brief') Tóm tắt
+              input.form-control(type='text' name="brief" required)
+            .form-group
+              label Các tác giả
+              button#add-author-article-btn.btn.btn-sm.btn-success(type='button' onclick='addAuthorArticle()' disabled='') +
+              #author-article-names
+                .input-block
+                  select.form-control.mb-3.d-inline-block(name='authorArticleSSN' onchange="$('#add-author-article-btn').prop('disabled', false)"  required)
+                    option(disabled='' selected='') Tác giả
+                    each author in otherAuthors
+                      option(value=`${author.ssn}`)= author.fullName
+                  button.btn.btn-sm.btn-danger.d-inline-block(type='button' onclick='removeAuthorArticle(this)') -
+            .form-group
+              label(for='keyword') Từ khóa
+              button#btn-add-keyword.btn.btn-sm.btn-success(type='button' onclick='addKeyword()') +
+              #keyword-fields
+                .input-block
+                  input.form-control.d-inline-block(type="text" name="keyword" required)
+                  button.btn.btn-sm.btn-danger.d-inline-block(type="button" onclick="removeKeyword(this)")
+            .form-group
+              label(for='file') File bài báo
+              input.form-control-file(type='file' name='file' id="FileUploader"  required)
+            #submit-btn.d-flex.justify-content-end.mt-2
+              button.btn.btn-success.mr-3(type='submit') Đăng bài
+              button.btn.btn-danger.mr-3(type='reset') Hủy
+      script(src="/javascripts/post-article.js")

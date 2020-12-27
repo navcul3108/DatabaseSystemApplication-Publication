@@ -15,7 +15,7 @@ a {
 
 footer{
   position: relative;
-  bottom: 0;d
+  bottom: 0;
   left: 0;
   width: 100%;
   overflow: hidden;
@@ -23,4 +23,14 @@ footer{
 
 .page-footer{
   margin-top: 10rem;
+}
+
+input,
+select,
+textarea{
+    max-width: 30rem;
+}
+
+label{
+    min-width: 30rem;
 }
