@@ -28,6 +28,7 @@ html
               a.nav-link.dropdown-toggle#author-dropdown(role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Tác giả
               .dropdown-menu(aria-labelledby="author-dropdown")
                 a.dropdown-item(href="/author/post-article") Đăng bài
+                a.dropdown-item(href="/article/author-articles?currentRole=author") Xem bài đã đăng                
           if isReviewer
             li.nav-item.dropdown
               a.nav-link.dropdown-toggle#author-dropdown(role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") Phản biện
@@ -39,6 +40,7 @@ html
               .dropdown-menu(aria-labelledby="author-dropdown")
                 a.dropdown-item(href="/editor/assign-review") Phân công phản biện
                 a.dropdown-item(href="/editor/update-result") Cập nhật kết quả
+                a.dropdown-item(href="/editor/list-articles") Danh sách bài báo
                 
         ul.navbar-nav
           if user == undefined

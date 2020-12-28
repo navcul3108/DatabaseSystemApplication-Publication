@@ -2,5 +2,5 @@ extends layout
 
 block content
   h3.text-danger Error: #{message}
-  h4.text-info Status:  #{error.status}
-  pre Stack #{error.stack}
+  h4.text-info Status:  #{error? error.status: ""}
+  pre Stack #{error? error.stack: ""}

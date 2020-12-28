@@ -43,8 +43,25 @@ const getAllAuthorExceptMySelf = async (ssn)=>{
         return [];
 }
 
+const getAllAuthorsOfAArticle = async(code) =>{
+    const sqlStatement = `Select MABAIBAO, TACGIASSN, HO+' '+TEN From BAIBAOVATACGIA WHERE MABAIBAO='${code}';`;
+
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    if(table.rows.length>0)
+    {
+        const result = [];
+        table.rows.forEach(row => {
+            result.push({ssn: row[1], fullName: row[2]});
+        })
+        return result;
+    }
+    else
+        return null;
+}
+
 module.exports = {
     updateProfile: updateProfile,
     getProfile: getProfile,
-    getAllAuthorExceptMySelf: getAllAuthorExceptMySelf
+    getAllAuthorExceptMySelf: getAllAuthorExceptMySelf,
+    getAllAuthorsOfAArticle: getAllAuthorsOfAArticle
 }

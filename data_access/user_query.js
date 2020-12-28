@@ -115,11 +115,22 @@ const updateScientistProfile = async(ssn, firstName, lastName, address, workingP
     return await dbUtils.queryDatabase(config, sqlStatement, successMsg); 
 }
 
+const getFullName = async(ssn) =>{
+    const sqlStatement = `Select HO+TEN From NHAKHOAHOC WHERE SSN='${ssn}'`;
+
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    if(table.rows && table.rows.length>0)
+        return {ssn: ssn, fullName: table.rows[0][0]}
+    else
+        return null;
+}
+
 module.exports = {
     getSSN: getSSN, 
     registerNewUser: registerNewUser,
     changeGroup: changeGroup,
     getProfileOfScientist: getProfileOfScientist,
     updateScientistProfile: updateScientistProfile,
-    userRole : userRole
+    userRole : userRole,
+    getFullName: getFullName
 }

@@ -1,0 +1,21 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Phân công phản biện"
+
+block content
+      .card.w-100
+        .card-header.bg-primary 
+          h5.font-weight-bold.d-inline-block Phân công phản biện
+          button.btn.btn-danger.btn-sm.float-right.d-inline-block Chỉnh sửa
+        .card-body.mt-3
+          form(action="/assign-reviewer" method="post")
+          .h5.font-weight-bold Phản biện 1
+          .form-group
+            label Phản biện 1
+            select.form-control(name="reviewerSSN")
+              each tup in allReviewer
+                option(value=`${tup.ssn}`)= tup.fullName
+          .form-group.d-flex.justify-content-end
+            button.btn.btn-success(type="submit") Cập nhật
+            button.btn.btn-danger(type="reset") Hủy bỏ 

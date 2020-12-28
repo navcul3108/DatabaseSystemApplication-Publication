@@ -1,0 +1,175 @@
+extends ../layout.pug
+
+block variables
+  -var title= "Chi tiết bài báo"
+
+block content
+      // phần thông tin bài báo
+      .card.w-100
+        .card-header.bg-info
+          h4.text-white.d-inline
+            | Thông tin bài báo
+            if isContactAuthor
+              button.btn.btn-danger.float-right Edit
+        .card-body
+          h3.card-title
+            | Tên bài báo:
+            a.text-primary.ml-3= detail.title
+          .row
+            .col-md-6
+              h5.font-weight-bold Thể loại: #[a.text-info= detail.type]
+            .col-md-6
+              h5.font-weight-bold Ngày gởi: #{detail.sendingDate}
+          .mt-2.mb-2
+            h5.font-weight-bold File bài báo: 
+              a.card-link.ml-3(href=`/public/articleFile?filePath=${detail.filePath}` style='text-decoration: underline;')= detail.fileName
+            h5.font-weight-bold Tac gia lien lac: 
+              a.text-secondary.ml-3= contactAuthorProfile.fullName
+            h5.font-weight-bold.mt-3.mb-3 Các tác giả khác
+            ul.list-group
+              each author in allAuthorNames
+                li.list-group-item= author.fullName
+            h5.font-weight-bold.mt-3.mb-3
+              | Biên tập: 
+              a.text-success= editorProfile? editorProfile.fullName: 'Chưa có biên tâp'
+            if isEditorOfThisArticle
+              form(action='/editor/update-state')
+                .row
+                  h5.col-md-2 Trạng thái xử lý:
+                  select#state.form-control.col-md-5(disabled)
+                    option(selected)= detail.state
+                    option= nextPossibleState[0]
+                  button#update-or-submit-btn.btn.btn-sm.btn-outline-primary.col-md-2.ml-2.mr-2(type='button') Thay doi
+                  button#cancel-upate-state.btn.btn-sm.btn-outline-danger.col-md-2.ml-2.mr-2(type='reset' disabled='') Huy bo
+            else
+              h5.font-weight-bold Trang thai: #[a(disabled).text-primary= detail.state]
+      // Phan phan bien, phan bien nao cap nhat phan bien cho bai phan bien do
+      .mt-5.card.w-100
+        .card-header.bg-success
+          h4.text-white.d-inline-block Ket qua phan bien
+        .card-body
+          .card.w-100
+            .card-header.bg-secondary
+              | Phan bien: ABC
+              button.btn.btn-danger.d-inline-block.float-right(type='button' onclick='enableEdit(this)') Edit
+            .card-body
+              form
+                table.table.table-info.table-bordered
+                  thead
+                    th
+                      | Tieu chi
+                      // Noi dung cua tieu chi danh gia
+                    th Mo ta
+                    th Diem
+                  tbody
+                    tr
+                      td Do chinh xac cua bai bao
+                      td
+                        select#1(name='description' disabled='' onchange='changeScore(this)')
+                          option(value='1') Kho hieu-1
+                          option(value='4') Hoi kho hieu-4
+                          option(value='7') De hieu-7
+                          option(value='10') Cuc ky de hieu-10
+                      td.score 5
+                    tr
+                      td Muc do de hieu cua bai bao
+                      td
+                        select#1(name='description' disabled='' onchange='changeScore(this)')
+                          option(value='1') Kho hieu-1
+                          option(value='4') Hoi kho hieu-4
+                          option(value='7') De hieu-7
+                          option(value='10') Cuc ky de hieu-10
+                      td.score 5
+                    tr
+                      td Do huu ich cua bai bao
+                      td
+                        select#1(name='description' disabled='' onchange='changeScore(this)')
+                          option(value='1') Kho hieu-1
+                          option(value='4') Hoi kho hieu-4
+                          option(value='7') De hieu-7
+                          option(value='10') Cuc ky de hieu-10
+                      td.score 5
+                    tr
+                      td(colspan='2') Tong diem
+                      td
+                        a#total-1.text-info 10
+                .form-group.ml-auto.mr-auto
+                  label Ghi chu cho tac gia
+                  textarea.form-control.w-100(disabled='') jjfaklllllllllllllllllllllllllllllllllllllll
+                .form-group.ml-auto.mr-auto
+                  label Ghi chu cho bientap
+                  textarea.form-control.w-100(disabled='') Fskjlafsssssssssssssssssssssssssssssssssssssss
+                p.text-break &#x1EA1;lfskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+          .mt-5.card.w-100
+            .card-header.bg-secondary Phan bien: Tac gia
+            .card-body
+              table.table.table-info.table-bordered
+                thead
+                  th
+                    | Tieu chi
+                    // Noi dung cua tieu chi danh gia
+                  th Mo ta
+                  th Diem
+                tbody
+                  tr
+                    td Do chinh xac cua bai bao
+                    td Khong chinh xac
+                    td.score 5
+                  tr
+                    td Muc do de hieu cua bai bao
+                    td
+                      | Kho hieu
+                    td.score 5
+                  tr
+                    td Do huu ich cua bai bao
+                    td Vai cho lien quan den thuc te
+                    td.score 5
+                  tr
+                    td(colspan='2') Tong diem
+                    td
+                      a#total-1.text-info 5
+              p Ghi chu cho tac gia
+              .border.border-info.p-2
+                p.text-break ahfshklafaklaglkahsgkajlagjksalghkssjlasfjasjfkalfj
+          .mt-5.card.w-100
+            .card-header Phan bien: ABC
+            .card-body
+              table.table.table-info.table-bordered
+                thead
+                  th
+                    | Tieu chi
+                    // Noi dung cua tieu chi danh gia
+                  th Mo ta
+                  th Diem
+                tbody
+                  tr
+                    td Do chinh xac cua bai bao
+                    td Khong chinh xac
+                    td.score 5
+                  tr
+                    td Muc do de hieu cua bai bao
+                    td
+                      | Kho hieu
+                    td.score 5
+                  tr
+                    td Do huu ich cua bai bao
+                    td Vai cho lien quan den thuc te
+                    td.score 5
+                  tr
+                    td(colspan='2') Tong diem
+                    td
+                      a#total-1.text-info 5
+              p Ghi chu cho bien tap
+              .border.border-info.p-2
+                p.text-break ahfshklafaklaglkahsgkajlagjksalghkssjlasfjasjfkalfj
+      // Phan thong bao, bien tap moi co the chinh sua    
+      .card.w-100
+        .card-header.bg-warning
+          h4.text-white.d-inline-block Thong bao
+          button.btn.btn-sm.btn-primary.float-right(type='button') Edit
+        .card-body
+          h4 Thong bao cho tac gia
+          .mt-3.p-3.border.border-primary
+            p.text-break.text-info
+              | afsjkllllllllllllllllllllllljglkajglkajlkgjalkjgslkasjflkasjflkjalkfsjlajaljglkjasklfjaljglaklgjalk
+      script(src='/javascripts/article-detail.js')

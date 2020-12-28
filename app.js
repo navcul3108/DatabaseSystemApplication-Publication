@@ -13,6 +13,7 @@ var adminRouter = require("./routes/admin");
 var authorRouter = require("./routes/author");
 var editorRouter = require("./routes/editor");
 var reviewerRouter = require("./routes/reviewer");
+var articleRouter = require("./routes/article");
 
 var publicRouter = require("./routes/public");
 
@@ -152,9 +153,10 @@ app.use('/users', userRouter);
 app.use("/query", queryRouter);
 app.use("/admin", adminRouter);
 app.use("/author", authorRouter);
-app.use("/editor", editorRouter);
+app.use("/editor", editorRouter); 
 app.use("/reviewer", reviewerRouter);
 app.use("/public", publicRouter);
+app.use("/article", articleRouter);
 
 app.get('/', (req, res) => {
   res.render('home/index');

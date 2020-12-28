@@ -1,0 +1,28 @@
+extends ../layout.pug
+
+block variables
+  -var title= "Danh sách bài báo"
+
+block content
+      .form-group
+        h5.text-primary.font-weight-bold Lọc theo
+          select.form-control(onchange="filterArticle()")
+            option(value="haveNotEditor") Chưa có biên tập
+            option(value="haveNotAnyReviewer") Chưa có phản biện
+            option(value="sending") Đang gửi
+            option(value="reviewing") Phản biện
+            option(value="feedbacking") Phản hồi phản biện
+            option(value="reviewed") Hoàn tất phản biện
+            option(value="published") Xuất bản
+            option(value="posted") Đã đăng
+        table.table.table-striped
+          thead.thead-dark
+            th Mã bài báo
+            th Tên
+            th Ngày gởi
+            th Thể loại
+            th Trạng thái
+            th Thao tác
+          tbody
+          // insert here
+      script(src="/javascripts/list-articles.js")

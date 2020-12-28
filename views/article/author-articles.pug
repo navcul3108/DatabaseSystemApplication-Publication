@@ -1,0 +1,25 @@
+extends ../layout.pug
+
+block variables
+  -var title = "Các bài báo đã đăng"
+
+block content
+      h2.text-primary Các bài báo bạn là tác giả
+      table.table.table-striped
+        thead.thead-dark
+          th Mã bài báo
+          th Tên bài báo
+          th Tác giả liên lạc
+          th Trạng thái
+          th Phản biện
+          th Chi tiết
+        tbody
+          each profile in profileOfArticles
+            tr
+              td= profile.code
+              td= profile.title
+              td= profile.contactAuthorName
+              td= profile.state
+              td= profile.reviewerName? profile.reviewerName: 'Chưa có'
+              td 
+                a.badge.badge-info(href=`article-detail?code=${profile.code}&currentRole=${currentRole}`) Chi tiết
