@@ -48,10 +48,14 @@ function genRowHtmlCode(filtertype, articleProfile){
                                 </form>`
             break;
         case articleFilterTypes.haveNotAnyReviewer:
-            methodHtmlCode = `<a class="btn btn-success" href="assign-reviewer?code=${articleProfile.code}">Phân công</a>`
+            methodHtmlCode = `<a class="btn btn-sm btn-success" href="assign-reviewer?code=${articleProfile.code}">Phân công</a>`
+            break;
+        case articleFilterTypes.sending:
+            methodHtmlCode = `<a class="d-inline mr-3 btn btn-sm btn-success" href="assign-reviewer?code=${articleProfile.code}">Phân công</a>
+                              <a class="d-inline float-right btn btn-sm btn-success" href="/article/article-detail?code=${articleProfile.code}&currentRole=editor">Chi tiết</a>`
             break;
         default: 
-            methodHtmlCode = `<a class="btn btn-success" href="/article/article-detail?code=${articleProfile.code}&currentRole=editor">Chi tiết</a>`;
+            methodHtmlCode = `<a class="btn btn-sm btn-success" href="/article/article-detail?code=${articleProfile.code}&currentRole=editor">Chi tiết</a>`;
     }
     return `<tr>
                 <td>${articleProfile.code}</td>

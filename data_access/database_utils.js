@@ -8,7 +8,7 @@ require('dotenv').config();
  * @param {string} successMsg
  * @return If returnTable is True, return recordset, else return true if success else false
  */
-const queryDatabase = async (config, sqlStatement, successMsg, returnTable = false) => {
+const queryDatabase = async (config, sqlStatement, successMsg, returnTable = false, affectAtLeastOne= false) => {
     sql.on("error", err => {
         console.error(err);
     })
@@ -61,14 +61,18 @@ const queryDatabase = async (config, sqlStatement, successMsg, returnTable = fal
         return result;
     }
     else {
-        if (error == null && result.rowsAffected.every(num=> num>0))
+        if (error == null){
+            // Nếu yêu cầu query tác động ít nhất 1 row, khoong có tác động đến bất kỳ row nào thì return false
+            if(affectAtLeastOne && result.rowsAffected.some(num=> num==0))
+                return false;
             return true;
+        } 
         else
             return false;
     }
 }
 
-const execProcedure = async (config, procedureName, params, successMsg, returnTable = false) => {
+const execProcedure = async (config, procedureName, params, successMsg, returnTable = false, affectAtLeastOne= false) => {
     var conn = new sql.ConnectionPool(config, (err) => {
         if (err != null)
             console.log("Error while setting connection to database ", err)
@@ -119,8 +123,12 @@ const execProcedure = async (config, procedureName, params, successMsg, returnTa
         return result;
     }
     else {
-        if (error == null && result.rowsAffected.every(num=> num>0))
+        if (error == null){
+            // Nếu yêu cầu query tác động ít nhất 1 row, khoong có tác động đến bất kỳ row nào thì return false
+            if(affectAtLeastOne && result.rowsAffected.some(num=> num==0))
+                return false;
             return true;
+        } 
         else
             return false;
     }

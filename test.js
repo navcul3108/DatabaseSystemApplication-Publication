@@ -14,7 +14,7 @@ var config = {
 
 async function foo(){
     try{
-        return await editorQuery.acceptArticle('1111111112', '111111111');
+        return await editorQuery.getReviewersOfAArticle('2222222222', '111111111');
     }
     catch(err){
         console.log(err);

@@ -6,16 +6,45 @@ block variables
 block content
       .card.w-100
         .card-header.bg-primary 
-          h5.font-weight-bold.d-inline-block Phân công phản biện
-          button.btn.btn-danger.btn-sm.float-right.d-inline-block Chỉnh sửa
+          h5.font-weight-bold.d-inline-block Phân công phản biện cho bài #{title}
+          button.btn.btn-danger.btn-sm.float-right.d-inline-block(onclick="enableEdit()") Chỉnh sửa
         .card-body.mt-3
-          form(action="/assign-reviewer" method="post")
-          .h5.font-weight-bold Phản biện 1
-          .form-group
-            label Phản biện 1
-            select.form-control(name="reviewerSSN")
-              each tup in allReviewer
-                option(value=`${tup.ssn}`)= tup.fullName
-          .form-group.d-flex.justify-content-end
-            button.btn.btn-success(type="submit") Cập nhật
-            button.btn.btn-danger(type="reset") Hủy bỏ 
+          .mb-5
+            button.btn.btn-secondary.float-right(onclick="addReviewer()" disabled) Thêm
+          select.form-control(type="hidden" name="reviewerSSN" id="templateSelect" disabled onchange="enableSubmit()")
+            each tup in allReviewer
+              option(value=`${tup.ssn}`)= tup.fullName
+          input.form-control.mt-3(type="date" name="deadline" id="tempateDeadline" hidden)
+          form.mt-3(action="assign-reviewer" method="post")
+            .select-block.mt-3
+              if reviewers.length>0
+                each reviewer, idx in reviewers
+                  .h5.font-weight-bold Phản biện #{idx}
+                  .form-group.border.border-success.p-3
+                    h5.d-inline Phân công
+                    button.d-inline.float-right.btn.btn-warning.btn-sm(onclick="deleteReviewer(this))" disabled) Xóa
+                    select.form-control(name="reviewerSSN" disabled onchange="enableSubmit()")
+                      each tup in allReviewer
+                        if tup.ssn==reviewer.ssn
+                          option(value=`${tup.ssn}` selected)= tup.fullName
+                        else
+                          option(value=`${tup.ssn}`)= tup.fullName
+                    h5.mt-3 Ngày gởi
+                    input.form-control.mt-3(type="date" class="deadline" name="deadline" value=`${reviewer.deadline}` disabled)
+              else
+                .form-group.border.border-success.p-3
+                  h5.font-weight-bold Phản biện 1
+                  .mt-3.mb-3
+                    h5.d-inline Phân công
+                    button.btn.btn-warning.d-inline.float-right(onclick="deleteReviewer(this)" disabled) Xóa
+                  select.form-control(name="reviewerSSN" disabled)
+                    each tup in allReviewer
+                      option(value=`${tup.ssn}`)= tup.fullName            
+                  h5.mt-3 Ngày gởi
+                  input.form-control.mt-3(type="date" name="deadline" class="deadline" disabled)            
+            .form-group.d-flex.justify-content-end
+              button.btn.btn-success(type="submit" disabled) Cập nhật
+              button.btn.btn-danger(type="reset" disabled) Hủy bỏ 
+            input(type="hidden" name="code" value=`${code}`)
+
+      script(src="/javascripts/assign-reviewer.js")

@@ -53,7 +53,7 @@ const filterArticlesByType = async (type, editorSSN)=>{
             sqlStatement = `Select MABAIBAO, TIEUDE, NGAYGOI, LOAIBAIBAO, TRANGTHAI 
                             From BAIBAOVALOAI 
                             WHERE BIENTAPSSN IS NOT NULL 
-                                AND MABAIBAO NOT IN (SELECT MABAIBAO FROM PHANCONG)
+                                AND MABAIBAO IN (SELECT MABAIBAO FROM PHANCONG)
                                 AND TRANGTHAI = 'DangNop';`;
             break;
         case articleFilterTypes.reviewing:
@@ -91,7 +91,7 @@ const acceptArticle = async (code, editorSSN) =>{
     return await dbUtils.queryDatabase(config, sqlStatement, "");
 }
 
-const getAllReviewer = async (editorSSN)=>{
+const getAllReviewerExceptMe = async (editorSSN)=>{
     const sqlStatement = `Select N.SSN, HO+' '+TEN From NHAKHOAHOC N JOIN PHANBIEN P ON N.SSN=P.SSN WHERE N.SSN!= '${editorSSN}';`
 
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
@@ -105,11 +105,78 @@ const getAllReviewer = async (editorSSN)=>{
     return [];
 }
 
+const getReviewersOfAArticle = async (code)=>{
+    const sqlStatement = `Select SSN, HO+' '+TEN, HANGOI From PHANCONG P Left JOIN NHAKHOAHOC N ON P.PHANBIENSSN = N.SSN WHERE MABAIBAO='${code}';`;
+
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    if(table.rows.length>0)
+    {
+        let reviewerDetail = [];
+        table.rows.forEach(row=>{
+            reviewerDetail.push({ssn: row[0], fullName: row[1], deadline: row[2]});
+        });
+        return reviewerDetail;
+    }
+    return [];
+}
+
+const updateReviewers = async (code, editorSSN, assignmentDetails) =>{
+    // reviewerDetails: [{reviewerSSN:"", deadline: ""}]
+    const oldReviewers = await getReviewersOfAArticle(code);
+    let deletedReviewerSSNs= [];
+    let insertedReviewerDetails = [];
+
+    oldReviewers.forEach(reviewer =>{
+        // Nếu không match với bất kỳ ssn nào
+        if(assignmentDetails.every(detail => reviewer.ssn!=detail.reviewerSSN))
+            deletedReviewerSSNs.push(reviewer.ssn);
+    });
+
+    assignmentDetails.forEach(detail=>{
+         // Nếu không match với bất kỳ ssn nào
+         if(oldReviewers.every(reviewer => reviewer.ssn!=detail.reviewerSSN))
+            insertedReviewerDetails.push(detail);
+    })
+
+    console.log(deletedReviewerSSNs, insertedReviewerDetails);
+
+    const assignNewReviewerProcedure = 'INSERT_PHANCONG';
+    const unassignReviewerProcefure = 'DELETE_PHANCONG';
+    let insertedParams = {"MABAIBAO": code, "PHANBIENSSN": "", "BIENTAPSSN": editorSSN, "HANGOI": ""};
+    let deletedParams = {"MABAIBAO": code, "PHANBIENSSN": "", "BIENTAPSSN": editorSSN};
+    let res = true;
+
+    for(deletedSSN in deletedReviewerSSNs)
+    {
+        deletedParams["PHANBIENSSN"] = deletedReviewerSSNs[idx];      
+        const isSuccess = await dbUtils.execProcedure(config, unassignReviewerProcefure, deletedParams, "")
+        if(!isSuccess){
+           res= isSuccess;
+           return false;
+        }
+    }
+
+    for(idx in insertedReviewerDetails){
+        insertedParams["PHANBIENSSN"] = insertedReviewerDetails[idx].reviewerSSN;
+        insertedParams["HANGOI"] = insertedReviewerDetails[idx].deadline;
+
+        const isSucess = await dbUtils.execProcedure(config, assignNewReviewerProcedure, insertedParams, "");
+        if(!isSucess){
+            res= isSuccess;
+            return false; 
+         }
+    }
+
+    return res;
+}
+
 module.exports = {
     updateProfile: updateProfile,
     getProfile: getProfile,
     articleFilterTypes: articleFilterTypes,
     filterArticlesByType: filterArticlesByType,
     acceptArticle: acceptArticle,
-    getAllReviewer: getAllReviewer
+    getAllReviewerExceptMe: getAllReviewerExceptMe,
+    updateReviewers: updateReviewers,
+    getReviewersOfAArticle: getReviewersOfAArticle
 }
