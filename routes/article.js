@@ -66,7 +66,7 @@ router.get("/article-detail", async (req, res)=>{
     const isContactAuthor = req.session.ssn === contactSSN;
 
     // lấy thông tin toàn bộ tác giả
-    const allAuthorNames = await authorQuery.getAllAuthorsOfAArticle(code);
+    const allAuthorNames = await authorQuery.getAllAuthorsOfAnArticle(code);
     if(!allAuthorNames){
         res.render("error", {message: "Có lỗi xảy ra trong quá trình thực thi"});
         return;

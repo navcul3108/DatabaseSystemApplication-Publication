@@ -4,6 +4,8 @@ const articleQuery = require("../data_access/article_query");
 const multer = require("multer");
 const fs = require("fs");
 
+const articleStates = articleQuery.articleStates;
+
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
 		const folderDir = `./public/articles/${req.session.user?req.session.user.id+'/':''}`;
@@ -40,7 +42,7 @@ router.get("/post-article", async (req, res) => {
         let error = { status: "", stack: "" };
         res.render("error", { message: "Bạn không phải là Tác giả", error: error });
     }
-    const otherAuthors = await authorQuery.getAllAuthorExceptMySelf(req.session.ssn);
+    const otherAuthors = await authorQuery.getAllAuthorExceptMe(req.session.ssn);
     res.render("author/post-article", { otherAuthors: otherAuthors });
 })
 
@@ -101,4 +103,35 @@ router.post("/post-article", upload.single("articleFile"),async (req, res) => {
     }
 })
 
+router.get("/view-article-detail", (req, res)=>{
+    const code = req.query.code;
+    if(!code){
+        res.render("error", {message: "Truy vấn không hợp lệ"});
+        return;
+    }
+    const fullProfile = await articleQuery.getFullProfileOfArticle(code);
+
+    let isContactAuthor = fullProfile.detail.contactSsn == req.session.ssn;
+
+    let canViewReview = false;
+    if(fullProfile.detail.state){
+        canViewReview = (fullProfile.detail.state!==articleStates.sending) 
+                    && (fullProfile.detail.state!==articleStates.reviewing)
+                    && (fullProfile.detail.state!==articleStates.reviewed);
+    }
+    let reviewContents = [];
+    if(canViewReview){
+        reviewContents = await authorQuery.getReviewsOfAnArticle(code);
+    }
+
+    res.render("article/article-detail", {
+        currentRole: "author",
+        detail : fullProfile.detail,
+        allAuthorNames: allAuthorNames,
+        editorProfile: editorProfile,
+        canViewReview: canViewReview,
+        reviewContents: reviewContents,
+        isContactAuthor: isContactAuthor
+    })
+})
 module.exports = router;

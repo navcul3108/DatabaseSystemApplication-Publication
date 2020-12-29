@@ -105,7 +105,7 @@ const getAllReviewerExceptMe = async (editorSSN)=>{
     return [];
 }
 
-const getReviewersOfAArticle = async (code)=>{
+const getReviewersOfAnArticle = async (code)=>{
     const sqlStatement = `Select SSN, HO+' '+TEN, HANGOI From PHANCONG P Left JOIN NHAKHOAHOC N ON P.PHANBIENSSN = N.SSN WHERE MABAIBAO='${code}';`;
 
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
@@ -122,7 +122,7 @@ const getReviewersOfAArticle = async (code)=>{
 
 const updateReviewers = async (code, editorSSN, assignmentDetails) =>{
     // reviewerDetails: [{reviewerSSN:"", deadline: ""}]
-    const oldReviewers = await getReviewersOfAArticle(code);
+    const oldReviewers = await getReviewersOfAnArticle(code);
     let deletedReviewerSSNs= [];
     let insertedReviewerDetails = [];
 
@@ -170,6 +170,24 @@ const updateReviewers = async (code, editorSSN, assignmentDetails) =>{
     return res;
 }
 
+const getReviewsOfAnArticle = async(code)=>{
+    const sqlStatement = `Select B.MABAIBAO, B.PHANBIENSSN, NGAYPHANCONG, HANGOI, KETQUA, GHICHUBIENTAP, NOIDUNG 
+                        FROM PHANCONG P JOIN BAIPHANBIEN B ON P.MABAIBAO = B.MABAIBAO AND P.PHANBIENSSN = B.PHANBIENSSN
+                        WHERE B.MABAIBAO = '${code}';`;
+
+    const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
+    if(table.rows.length>0){
+        let result = [];
+        const rows = table.rows;
+        rows.forEach(row => {
+            result.push({code: row[0], reviewerSSN: row[1], assignDate: row[2], deadline: row[3], result: row[4], noteForEditor: row[5], content: row[6]});
+        });
+        return result;
+    }
+    else
+        return [];
+}
+
 module.exports = {
     updateProfile: updateProfile,
     getProfile: getProfile,
@@ -178,5 +196,6 @@ module.exports = {
     acceptArticle: acceptArticle,
     getAllReviewerExceptMe: getAllReviewerExceptMe,
     updateReviewers: updateReviewers,
-    getReviewersOfAArticle: getReviewersOfAArticle
+    getReviewersOfAnArticle: getReviewersOfAnArticle,
+    getReviewsOfAnArticle: getReviewsOfAnArticle
 }

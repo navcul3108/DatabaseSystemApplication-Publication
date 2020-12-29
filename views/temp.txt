@@ -1,0 +1,31 @@
+tr
+                        td Do chinh xac cua bai bao
+                        td
+                          select#1(name='description' disabled='' onchange='changeScore(this)')
+                            option(value='1') Kho hieu-1
+                            option(value='4') Hoi kho hieu-4
+                            option(value='7') De hieu-7
+                            option(value='10') Cuc ky de hieu-10
+                        td.score 5
+                      tr
+                        td Muc do de hieu cua bai bao
+                        td
+                          select#1(name='description' disabled='' onchange='changeScore(this)')
+                            option(value='1') Kho hieu-1
+                            option(value='4') Hoi kho hieu-4
+                            option(value='7') De hieu-7
+                            option(value='10') Cuc ky de hieu-10
+                        td.score 5
+                      tr
+                        td Do huu ich cua bai bao
+                        td
+                          select#1(name='description' disabled='' onchange='changeScore(this)')
+                            option(value='1') Kho hieu-1
+                            option(value='4') Hoi kho hieu-4
+                            option(value='7') De hieu-7
+                            option(value='10') Cuc ky de hieu-10
+                        td.score 5
+                      tr
+                        td(colspan='2') Tong diem
+                        td
+                          a#total-1.text-info 10

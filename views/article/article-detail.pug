@@ -9,7 +9,7 @@ block content
         .card-header.bg-info
           h4.text-white.d-inline
             | Thông tin bài báo
-            if isContactAuthor
+            if currentRole==="author" && isContactAuthor
               button.btn.btn-danger.float-right Edit
         .card-body
           h3.card-title
@@ -32,7 +32,7 @@ block content
             h5.font-weight-bold.mt-3.mb-3
               | Biên tập: 
               a.text-success= editorProfile? editorProfile.fullName: 'Chưa có biên tâp'
-            if isEditorOfThisArticle
+            if currentRole==='editor' && canUpdateState
               form(action='/editor/update-state')
                 .row
                   h5.col-md-2 Trạng thái xử lý:
@@ -46,60 +46,69 @@ block content
       // Phan phan bien, phan bien nao cap nhat phan bien cho bai phan bien do
       .mt-5.card.w-100
         .card-header.bg-success
-          h4.text-white.d-inline-block Ket qua phan bien
+          h4.text-white.d-inline-block Kết quả phản biện
         .card-body
-          .card.w-100
-            .card-header.bg-secondary
-              | Phan bien: ABC
-              button.btn.btn-danger.d-inline-block.float-right(type='button' onclick='enableEdit(this)') Edit
-            .card-body
-              form
+          if currentRole=='reviewer'
+            .card.w-100
+              .card-header.bg-secondary
+                | Phản biện SSN: #{reviewContent.reviewerSSN}
+                if isEditable
+                  button.btn.btn-danger.d-inline-block.float-right(type='button' onclick='enableEdit(this)') Edit
+              .card-body
                 table.table.table-info.table-bordered
                   thead
-                    th
-                      | Tieu chi
-                      // Noi dung cua tieu chi danh gia
+                    th Tieu chi
                     th Mo ta
                     th Diem
                   tbody
-                    tr
-                      td Do chinh xac cua bai bao
-                      td
-                        select#1(name='description' disabled='' onchange='changeScore(this)')
-                          option(value='1') Kho hieu-1
-                          option(value='4') Hoi kho hieu-4
-                          option(value='7') De hieu-7
-                          option(value='10') Cuc ky de hieu-10
-                      td.score 5
-                    tr
-                      td Muc do de hieu cua bai bao
-                      td
-                        select#1(name='description' disabled='' onchange='changeScore(this)')
-                          option(value='1') Kho hieu-1
-                          option(value='4') Hoi kho hieu-4
-                          option(value='7') De hieu-7
-                          option(value='10') Cuc ky de hieu-10
-                      td.score 5
-                    tr
-                      td Do huu ich cua bai bao
-                      td
-                        select#1(name='description' disabled='' onchange='changeScore(this)')
-                          option(value='1') Kho hieu-1
-                          option(value='4') Hoi kho hieu-4
-                          option(value='7') De hieu-7
-                          option(value='10') Cuc ky de hieu-10
-                      td.score 5
-                    tr
-                      td(colspan='2') Tong diem
-                      td
-                        a#total-1.text-info 10
-                .form-group.ml-auto.mr-auto
-                  label Ghi chu cho tac gia
-                  textarea.form-control.w-100(disabled='') jjfaklllllllllllllllllllllllllllllllllllllll
-                .form-group.ml-auto.mr-auto
-                  label Ghi chu cho bientap
-                  textarea.form-control.w-100(disabled='') Fskjlafsssssssssssssssssssssssssssssssssssssss
-                p.text-break &#x1EA1;lfskkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+                    each criteria in allCriterias
+                      tr
+                        td criteria.content
+                        td criteria.description
+                        td criteria.score
+                if isEditable
+                  form(action="/reviewer/update-review" method="post")
+                    .form-group
+                      label Điểm số
+                      input.form-control(type="number" min="1" max="10" name="score")                   
+                    .form-group
+                      label Nội dung phản biện
+                      textarea.form-control(name="content" cols="30" rows="10" disabled)= reviewContent.
+                    .form-group.ml-auto.mr-auto
+                      label Ghi chú cho tác giả
+                      textarea.form-control.w-100(name="noteForAuthor" cols="30" rows="10" disabled)= reviewContent.noteForAuthor
+                    .form-group.ml-auto.mr-auto
+                      label Ghi chú cho biên tậps
+                      textarea.form-control.w-100(name="noteForEditor" cols="30" rows="10" disabled)= reviewContent.noteForEditor
+                    .d-flex.justify-content-end
+                      button.btn.btn-success(type="submit") Cập nhật
+                      button.btn.btn-danger(type="reset") Hủy bỏ
+          else if (currentRole==='author' && canViewReview)
+            // Lặp qua các bài phản biện
+            each review in reviewContents
+              .card.mb-3.mt-3
+                .card-header.bg-secondary
+                  | Phản biện SSN: #{review.reviewerSSN}
+                .card-body
+                  table.table.table-info.table-bordered
+                    thead
+                      th Tieu chi
+                      th Mo ta
+                      th Diem
+                    tbody
+                      each criteria in allCriterias
+                        tr
+                          td criteria.content
+                          td criteria.description
+                          td criteria.score
+                .mt-5
+                  h5.text-info Nội dung
+                  .border.border-primary
+                    p.text-break.p-3= review.content
+                  h5.text-info Ghi chú cho tác giả
+                  .border.border-primary
+                    p.text-break.p-3= review.noteForAuthor
+
           .mt-5.card.w-100
             .card-header.bg-secondary Phan bien: Tac gia
             .card-body

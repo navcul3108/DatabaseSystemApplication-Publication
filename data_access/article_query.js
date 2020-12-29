@@ -227,6 +227,36 @@ const getReview = async(code, reviewerSSN=null)=>{
         return null;    
 }
 
+const getFullProfileOfArticle = async (code) =>{
+    const detail = await articleQuery.getArticle(code);
+    if(!detail){
+        return null;
+    }
+
+    const contactSSN = detail.contactSSN;
+    const contactAuthorProfile = await userQuery.getFullName(contactSSN);
+    if(!contactAuthorProfile){
+        return null;
+    }
+
+    const allAuthorNames = await authorQuery.getAllAuthorsOfAArticle(code);
+    if(!allAuthorNames){
+        allAuthorNames = [];
+    }
+
+    let editorProfile= null;
+    if(detail.editorSSN)
+    {
+        editorProfile = await userQuery.getFullName(detail.editorSSN);
+    }
+    else
+        editorProfile = null;
+    
+    return {detail: detail,
+            contactAuthorProfile: contactAuthorProfile,
+            allAuthorNames: allAuthorNames,
+            editorProfile: editorProfile };
+}
 
 module.exports = {
     postResearchArticle: postResearchArticle,
@@ -235,5 +265,6 @@ module.exports = {
     viewPostedArticle: viewPostedArticle,
     getArticle: getArticle,
     getReview: getReview,
-    articleStates: articleStates
+    articleStates: articleStates,
+    getFullProfileOfArticle: getFullProfileOfArticle
 }

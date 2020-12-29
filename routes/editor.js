@@ -41,9 +41,67 @@ router.get("/assign-reviewer", async (req, res)=>{
     
     const allReviewerExceptMe = await editorQuery.getAllReviewerExceptMe(req.session.ssn);
     const articleDetail = await articleQuery.getArticle(code);
-    const reviewerOfThisArticle =await editorQuery.getReviewersOfAArticle(code);
+    const reviewerOfThisArticle =await editorQuery.getReviewersOfAnArticle(code);
 
     res.render("editor/assign-reviewer", {allReviewer: allReviewerExceptMe, code: code, title: articleDetail.title, reviewers: reviewerOfThisArticle});
+})
+
+router.get("/view-aricle-detail", async(req, res)=>{
+    const code = req.query.code;
+    if(!code){
+        res.render("error", {message: "Truy vấn không hợp lệ"});
+        return;
+    }
+
+    const fullProfile = await articleQuery.getFullProfileOfArticle(code);
+
+    const isEditorOfThisArticle = fullProfile.detail.editorSSN === req.session.ssn;
+    if(!isEditorOfThisArticle)
+    {
+        res.render("error", {message: "Bạn không phải là biên tập của bài báo này"});
+        return;
+    }
+
+    let reviewContents = await editorQuery.getReviewsOfAnArticle(code);
+
+    // Các trạng thái có thể chuyển đổi kết tiếp
+    const articleStates = articleQuery.articleStates;
+    let canUpdateState = false;
+    nextPossibleState = [];
+    switch(fullProfile.detail.state){
+        case articleStates.sending:
+            nextPossibleState = [articleStates.reviewing];
+            canUpdateState = reviewContents.every(review=> review.reviewerSSN!=null)
+            break;
+        case articleStates.reviewing:
+            nextPossibleState = [articleStates.feedbacking];
+            canUpdateState = true;
+            break;
+        case articleStates.feedbacking:
+            nextPossibleState = [articleStates.reviewed];
+            canUpdateState = reviewContents.every(review=> review.score!=null);
+            break;
+        case articleStates.reviewed:
+            nextPossibleState = [articleStates.published];
+            canUpdateState = detail.result != null;
+            break;
+        case articleStates.published:
+            nextPossibleState = [articleStates.posted];
+            canUpdateState = true;
+            break;
+        case articleStates.posted:
+            canUpdateState = false;
+            break;
+        default: break;
+    }
+
+    res.render("article/article-detail",   {currentRole: 'editor',
+                                            detail: fullProfile.detail,
+                                            contactAuthorProfile: fullProfile.contactAuthorProfile,
+                                            allAuthorNames: allAuthorNames,
+                                            editorProfile: editorProfile,
+                                            reviewContents: reviewContents,
+                                            nextPossibleState: nextPossibleState});
 })
 
 router.post("/assign-reviewer", async(req, res)=>{
