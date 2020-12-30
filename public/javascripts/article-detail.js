@@ -4,12 +4,19 @@ $(document).on("ready", ()=>{
 function enableEdit(btn){
     console.log($(btn).parent().siblings(".card-body"));
     $(btn).parent().siblings(".card-body").find("select").prop("disabled", false);
+    $("#review-article textarea").prop("disabled", false);
+    $("#review-article select").prop("disabled", false);
+    $("#update-article-result textarea,select,button").prop("disabled", false);
 }
 
 function changeScore(selectTag){
     let tdTag = $(selectTag).parent().siblings(".score");
     $(tdTag).text($(selectTag).val());
     calcScore(selectTag);
+}
+
+function cancelEdit(button){
+    $(button).closest("form").find("select,textarea,input,button").prop("disabled", true);
 }
 
 function calcScore(selectTag){

@@ -61,7 +61,7 @@ const getAllAuthorsOfAnArticle = async(code) =>{
 
 const getReviewsOfAnArticle = async(code) =>{
     const sqlStatement = `Select B.MABAIBAO, B.PHANBIENSSN, NGAYPHANCONG, HANGOI, KETQUA, GHICHUTACGIA, NOIDUNG 
-                            FROM PHANCONG P JOIN BAIPHANBIEN B ON P.MABAIBAO = B.MABAIBAO AND P.PHANBIENSSN = B.PHANBIENSSN
+                            FROM PHANCONG P LEFT JOIN BAIPHANBIEN B ON P.MABAIBAO = B.MABAIBAO AND P.PHANBIENSSN = B.PHANBIENSSN
                             WHERE B.MABAIBAO = '${code}';`;
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
     if(table.rows.length>0){

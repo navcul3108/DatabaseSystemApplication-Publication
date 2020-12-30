@@ -5,9 +5,18 @@ block variables
 
 block content
       if groups.length == 0
-        h2= user.profile.firstName + user.profile.lastName
-        h3= user.profile.email
-        h4 Khách
+        .card
+          .card-header.bg-primary
+            h5.text-white Thông tin
+          .card-body
+            .row
+              .col-md-4
+                img.w-100(src='/images/avatar-default.png')
+              .col-md-8
+                h2= user.profile.firstName +' '+ user.profile.lastName
+                h3= user.profile.email
+                h4 Khách
+
       else
         .container
           .card.mb-5

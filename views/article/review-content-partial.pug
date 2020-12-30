@@ -1,0 +1,117 @@
+mixin review-content-partial(currentRole, reviewerSSN, detail, allCriterias, reviewContents)
+  .mt-5.card.w-100
+    .card-header.bg-success
+      h4.text-white.d-inline-block Kết quả phản biện
+    .card-body
+      if currentRole=='reviewer'
+        .card.w-100
+          .card-header.bg-secondary
+            | Phản biện SSN: #{reviewerSSN}
+            if isEditable
+              button.btn.btn-danger.d-inline-block.float-right(type='button' onclick='enableEdit(this)') Edit
+          .card-body
+            .m-3
+              h5 Hạn nộp #{detail.deadline}
+            if isEditable
+              form(action="/reviewer/update-review-content" method="post" id="review-article")
+                // Bảng chấm điểm
+                table.table.table-striped.table-bordered
+                  thead
+                    th Tiêu chí
+                    th Mô tả
+                    th Điểm
+                  tbody
+                    each criteria in allCriterias
+                      tr
+                        td= criteria.content
+                        td
+                          select(name=`${criteria.content}` disabled)
+                            each val, _ in criteria.details
+                              if val.selected
+                                option(value=`${val.score}` selected)= val.description
+                              else
+                                option(value=`${val.score}`)= val.description
+                        td 10
+
+                input(type="hidden" name="code" value=`${detail.code}`)
+                .form-group
+                  h5 Nội dung phản biện
+                  textarea.form-control(name="content" cols="60" rows="5" disabled)= reviewContent? reviewContent.content: ""
+                .form-group.ml-auto.mr-auto
+                  h5 Ghi chú cho tác giả
+                  textarea.form-control.w-100(name="noteForAuthor" cols="60" rows="5" disabled)= reviewContent? reviewContent.noteForAuthor : ""
+                .form-group.ml-auto.mr-auto
+                  h5 Ghi chú cho biên tập
+                  textarea.form-control.w-100(name="noteForEditor" cols="60" rows="5" disabled)= reviewContent? reviewContent.noteForEditor : ""
+                .d-flex.justify-content-end
+                  button.btn.btn-success(type="submit") Cập nhật
+                  button.btn.btn-danger(type="reset") Hủy bỏ
+      else if (currentRole==='author' && canViewReview)
+        // Lặp qua các bài phản biện
+        if reviewContents.length>0
+          each review in reviewContents
+            .card.mb-3.mt-3
+              .card-header.bg-secondary
+                | Phản biện SSN: #{review.reviewerSSN}
+              .card-body
+                h5.text-info Nội dung
+                .border.border-primary
+                  p.text-break.p-3= review.content
+                h5.text-info Ghi chú cho tác giả
+                .border.border-primary
+                  p.text-break.p-3= review.noteForAuthor
+        else
+          h5.font-weight-bold Không có nội dung phản biện
+      else if (currentRole==='editor')
+        if reviewContents.length >0
+          each review in reviewContents
+            .card.mb-3.mt-3
+              .card-header.bg-secondary
+                h6.text-white Phản biện SSN: #{review.reviewerSSN}
+              .card-body
+                // Bảng đánh giá của phản biện
+                h5.font-weight-bold Bảng đánh giá dựa trên các tiêu chí
+                table.table.table-striped.table-bordered
+                  thead
+                    th Tiêu chí
+                    th Mô tả
+                    th Điểm
+                  tbody
+                    each criteria in review.reviewedCriterias
+                      tr
+                        td= criteria.content
+                        td= criteria.description
+                        td= criteria.score
+                // Nội dung chi tiết phản biện ghi chú
+                .mt-5
+                  h5.text-info Nội dung
+                  .border.border-primary
+                    p.text-break.p-3= review.content
+                  h5.text-info Ghi chú cho biên tập
+                  .border.border-primary
+                    p.text-break.p-3= review.noteForEditor
+                  h5.font-weight-bold.mt-3 Hạn gửi #{review.deadline}
+
+                // Chấp nhận hoặc từ chối bài phản biện này
+                if detail.state == 'PhanHoiPhanBien'
+                  form(action="feedback-review" method='post')
+                    input(type="hidden" name='code' value=`${detail.code}`)
+                    input(type="hidden" name='reviewerSSN' value=`${review.reviewerSSN}`)
+                    .form-control.mt-4
+                      h5 Cập nhật kết quả cho bài phản biện này
+                      select.form-control(name="result")
+                        if review.result == 'TuChoiPhanBien'
+                          option(value="ChapNhanPhanBien") Chấp nhận
+                          option(value="TuChoiPhanBien" selected) Từ chối
+                        else if review.result == 'ChapNhanPhanBien'
+                          option(value="ChapNhanPhanBien" selected) Chấp nhận
+                          option(value="TuChoiPhanBien") Từ chối
+                        else
+                          option(disabled selected) Chấp nhận hoặc từ chối
+                          option(value="ChapNhanPhanBien") Chấp nhận
+                          option(value="TuChoiPhanBien") Từ chối                          
+                    .d-flex.justify-content-end
+                      button.btn.btn-success(type="submit") Cập nhật
+                      button.btn.btn-danger(type="reset") Hủy bỏ
+        else 
+          h5.font-weight-bold Chưa có nội dung phản biện

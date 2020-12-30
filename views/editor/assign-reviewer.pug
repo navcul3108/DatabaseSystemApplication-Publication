@@ -15,7 +15,7 @@ block content
             each tup in allReviewer
               option(value=`${tup.ssn}`)= tup.fullName
           input.form-control.mt-3(type="date" name="deadline" id="tempateDeadline" hidden)
-          form.mt-3(action="assign-reviewer" method="post")
+          form.mt-3(action="assign-reviewers-for-an-article" method="post")
             .select-block.mt-3
               if reviewers.length>0
                 each reviewer, idx in reviewers

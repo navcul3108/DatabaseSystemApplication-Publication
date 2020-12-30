@@ -1,0 +1,45 @@
+mixin article-detail-partial(currentRole, isContactAuthor, detail, contactAuthorProfile, allAuthorNames, editorProfile, nextPossibleState, reviewers)
+  .card.w-100
+    .card-header.bg-info
+      h4.text-white.d-inline
+        | Thông tin bài báo
+        if currentRole==="author" && isContactAuthor
+          button.btn.btn-danger.float-right Edit
+    .card-body
+      h3.card-title
+        | Tên bài báo:
+        a.text-primary.ml-3= detail.title
+      .row
+        .col-md-6
+          h5.font-weight-bold Thể loại: #[a.text-info= detail.type]
+        .col-md-6
+          h5.font-weight-bold Ngày gởi: #{detail.sendingDate}
+      .mt-2.mb-2
+        h5.font-weight-bold File bài báo: 
+          a.card-link.ml-3(href=`/public/articleFile?filePath=${detail.filePath}` style='text-decoration: underline;')= detail.fileName
+        h5.font-weight-bold Tac gia lien lac: 
+          a.text-secondary.ml-3= contactAuthorProfile.fullName
+        h5.font-weight-bold.mt-3.mb-3 Các tác giả khác
+        ul.list-group
+          each author in allAuthorNames
+            li.list-group-item= author.fullName
+        h5.font-weight-bold.mt-3.mb-3
+          | Biên tập: 
+          a.text-success= editorProfile? editorProfile.fullName: 'Chưa có biên tâp'
+        if currentRole=='editor' && canUpdateState
+          form(action='/editor/update-state' method="post")
+            input(type="hidden" name="code" value=`${detail.code}`)
+            .row
+              h5.col-md-2 Trạng thái xử lý:
+              select#state.form-control.col-md-5(name="state" disabled)
+                option(selected)= detail.state
+                option= nextPossibleState[0]
+              button#update-or-submit-btn.btn.btn-sm.btn-outline-primary.col-md-2.ml-2.mr-2(type='button') Thay doi
+              button#cancel-upate-state.btn.btn-sm.btn-outline-danger.col-md-2.ml-2.mr-2(type='reset' disabled='') Huy bo
+        else
+          h5.font-weight-bold Trang thai: #[a(disabled).text-primary= detail.state]
+        if reviewers
+          h5.font-weight-bold.mt-3 Các phản biện
+          ul.list-group
+          each reviewer in reviewers
+            li.list-group-item= reviewer.fullName

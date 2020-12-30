@@ -48,26 +48,33 @@ router.post('/register', async (req, res)=>{
 });
 
 router.get('/profile', async (req, res)=>{
-  if(req.session.groups && req.session.groups[0].profile.name!="Admin")
+  if(req.session.groups)
   {
-    const profile = await userQuery.getProfileOfScientist(req.session.user.id);
-    const ssn = req.session.ssn;
-    var groupProfiles = new Map();
-    const groups = req.session.groups;
-
-    for(var i=0; i< groups.length; i++)
+    if( req.session.groups.length==0 || req.session.isAdmin)
     {
-      const group = groups[i];
-      if(group.profile.name=="Tác giả")
-        groupProfiles["Tác giả"] = await authorQuery.getProfile(ssn);
-      else if(group.profile.name == "Biên tập")
-        groupProfiles["Biên tập"] = await editorQuery.getProfile(ssn);
-      else if(group.profile.name == "Phản biện")
-        groupProfiles["Phản biện"] =  await reviewerQuery.getProfile(ssn);
-    } 
-
-    console.log(groupProfiles);
-    res.render("shared_profile", {groups: groups, profile: profile, groupProfiles: groupProfiles});
+      res.render("shared_profile", {user: req.session.user, groups: []});
+    }
+    else
+    {
+      const profile = await userQuery.getProfileOfScientist(req.session.user.id);
+      const ssn = req.session.ssn;
+      var groupProfiles = new Map();
+      const groups = req.session.groups;
+  
+      for(var i=0; i< groups.length; i++)
+      {
+        const group = groups[i];
+        if(group.profile.name=="Tác giả")
+          groupProfiles["Tác giả"] = await authorQuery.getProfile(ssn);
+        else if(group.profile.name == "Biên tập")
+          groupProfiles["Biên tập"] = await editorQuery.getProfile(ssn);
+        else if(group.profile.name == "Phản biện")
+          groupProfiles["Phản biện"] =  await reviewerQuery.getProfile(ssn);
+      } 
+  
+      console.log(groupProfiles);
+      res.render("shared_profile", {groups: groups, profile: profile, groupProfiles: groupProfiles});
+    }    
   }
   else{
     res.redirect('/users/register');

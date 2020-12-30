@@ -116,7 +116,7 @@ const updateScientistProfile = async(ssn, firstName, lastName, address, workingP
 }
 
 const getFullName = async(ssn) =>{
-    const sqlStatement = `Select HO+TEN From NHAKHOAHOC WHERE SSN='${ssn}'`;
+    const sqlStatement = `Select HO+' '+TEN From NHAKHOAHOC WHERE SSN='${ssn}'`;
 
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
     if(table.rows && table.rows.length>0)

@@ -97,13 +97,13 @@ router.post("/post-article", upload.single("articleFile"),async (req, res) => {
             else{
 				fs.unlinkSync(req.file.path);
 				res.render("error", { message: "Không thể đăng bài", error: { status: "", stack: "" } });
-			}
+            }
             break;
         }
     }
 })
 
-router.get("/view-article-detail", (req, res)=>{
+router.get("/view-article-detail", async (req, res)=>{
     const code = req.query.code;
     if(!code){
         res.render("error", {message: "Truy vấn không hợp lệ"});
@@ -127,8 +127,9 @@ router.get("/view-article-detail", (req, res)=>{
     res.render("article/article-detail", {
         currentRole: "author",
         detail : fullProfile.detail,
-        allAuthorNames: allAuthorNames,
-        editorProfile: editorProfile,
+        allAuthorNames: fullProfile.allAuthorNames,
+        contactAuthorProfile: fullProfile.contactAuthorProfile,
+        editorProfile: fullProfile.editorProfile,
         canViewReview: canViewReview,
         reviewContents: reviewContents,
         isContactAuthor: isContactAuthor

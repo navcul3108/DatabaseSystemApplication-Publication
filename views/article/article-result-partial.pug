@@ -1,0 +1,38 @@
+mixin article-result-partial(currentRole, detail)
+  if currentRole==='author' && detail.state==='HoanTatPhanBien'
+    .card.w-100.mt-5
+      .card-header.bg-warning
+        h4.text-white.d-inline-block Thông báo
+      .card-body
+        h5.font-weight-bold Kết quả #{detail.result}
+        h4 Thông báo cho tác giả
+        .mt-3.p-3.border.border-primary
+          p.text-break.text-info= detail.note
+
+  else if currentRole==='editor'
+    .card.w-100.mt-5
+      .card-header.bg-warning
+        h4.text-white.d-inline-block Thông báo
+        if currentRole==='editor' && detail.state==='HoanTatPhanBien' && detail.result==null
+          button.btn.btn-sm.btn-primary.float-right(type='button' onclick="enableEdit(this)") Edit
+      .card-body
+        if detail.result==null
+          form(action='update-article-result' method="post" id="update-article-result")
+            input(type="hidden" name="code" value=`${detail.code}`)
+            .mt-3.p-3.form-group
+              h5.font-weight-bold Cập nhật kết quả
+              select.form-control(name='result' disabled)
+                option(value='acceptance') Chấp nhận bài báo
+                option(value='minor revision') Cần chỉnh sửa lại một phần
+                option(value='major revision') Cần chỉnh sửa lại phần lớn
+                option(value='rejecttion') Từ chối
+            h4 Thông báo cho tác giả
+            .mt-3.p-3.form-group
+              textarea.form-control.w-100(name="note", cols="60", rows="5" disabled).text-break.text-info
+            .d-flex.justify-content-end
+              button.btn.btn-success(type="submit") Cập nhật
+              button.btn.btn-danger(type="reset" onclick="cancelEdit(this)") Hủy bỏ
+        else
+          .border.border-primary.p-3
+            h5.font-weight-bold Kết quả: #{detail.result}
+            p.text-break.mt-3= detail.note

@@ -1,4 +1,6 @@
 const dbUtils = require("./database_utils");
+const userQuery = require("./user_query");
+const authorQuery = require("./author_query");
 
 const articleStates = {
     sending: 'DangNop',
@@ -181,7 +183,8 @@ const getArticle = async (code)=>{
             result: row[10],
             sendingDate: new Date(row[6]).toLocaleDateString(),
             contactSSN: row[4],
-            type: row[8]
+            type: row[8],
+            note: row[11]
         }
         switch(result.type){
             case articleTypes.research:
@@ -206,19 +209,19 @@ const getReview = async(code, reviewerSSN=null)=>{
     let login = dbUtils.databaseLogin["Phản biện"];
     config.user = login.user;
     config.password = login.password;
-    const sqlStatement = `Select * From BAIPHANBIEN WHERE MABAIBAO='${code}' ${reviewerSSN? `and PHANBIENSSN='${reviewerSSN}'`:''};`;
+    const sqlStatement = `Select B.MABAIBAO, B.PHANBIENSSN, GHICHUBIENTAP, GHICHUTACGIA, NOIDUNG, NGAYPHANCONG, HANGOI, KETQUA from BAIPHANBIEN B Join PHANCONG P ON B.MABAIBAO=P.MABAIBAO AND B.PHANBIENSSN=P.PHANBIENSSN WHERE B.MABAIBAO='${code}' ${reviewerSSN? `and B.PHANBIENSSN='${reviewerSSN}'`:''};`;
 
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
     if(table.rows.length>0){
         if(reviewerSSN){
             const row = table.rows[0];
-            return {code: row[0], reviewerSSN: row[2], noteForEditor: row[3], noteForAuthor: row[4], content: row[5]}    
+            return {code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: row[6], result: row[7]}    
         }
         else{
             let result = [];
             const rows = table.rows;
             rows.forEach(row => {
-                result.push({code: row[0], reviewerSSN: row[2], noteForEditor: row[3], noteForAuthor: row[4], content: row[5]});
+                result.push({code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: row[6], result: row[7]});
             });
             return result;
         }
@@ -228,7 +231,7 @@ const getReview = async(code, reviewerSSN=null)=>{
 }
 
 const getFullProfileOfArticle = async (code) =>{
-    const detail = await articleQuery.getArticle(code);
+    const detail = await getArticle(code);
     if(!detail){
         return null;
     }
@@ -239,7 +242,7 @@ const getFullProfileOfArticle = async (code) =>{
         return null;
     }
 
-    const allAuthorNames = await authorQuery.getAllAuthorsOfAArticle(code);
+    const allAuthorNames = await authorQuery.getAllAuthorsOfAnArticle(code);
     if(!allAuthorNames){
         allAuthorNames = [];
     }
@@ -266,5 +269,6 @@ module.exports = {
     getArticle: getArticle,
     getReview: getReview,
     articleStates: articleStates,
-    getFullProfileOfArticle: getFullProfileOfArticle
+    getFullProfileOfArticle: getFullProfileOfArticle,
+    articleResult: articleResult
 }

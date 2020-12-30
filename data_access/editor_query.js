@@ -52,7 +52,7 @@ const filterArticlesByType = async (type, editorSSN)=>{
         case articleFilterTypes.sending:
             sqlStatement = `Select MABAIBAO, TIEUDE, NGAYGOI, LOAIBAIBAO, TRANGTHAI 
                             From BAIBAOVALOAI 
-                            WHERE BIENTAPSSN IS NOT NULL 
+                            WHERE BIENTAPSSN = '${editorSSN}'
                                 AND MABAIBAO IN (SELECT MABAIBAO FROM PHANCONG)
                                 AND TRANGTHAI = 'DangNop';`;
             break;
@@ -146,7 +146,7 @@ const updateReviewers = async (code, editorSSN, assignmentDetails) =>{
     let deletedParams = {"MABAIBAO": code, "PHANBIENSSN": "", "BIENTAPSSN": editorSSN};
     let res = true;
 
-    for(deletedSSN in deletedReviewerSSNs)
+    for(idx in deletedReviewerSSNs)
     {
         deletedParams["PHANBIENSSN"] = deletedReviewerSSNs[idx];      
         const isSuccess = await dbUtils.execProcedure(config, unassignReviewerProcefure, deletedParams, "")
@@ -170,9 +170,9 @@ const updateReviewers = async (code, editorSSN, assignmentDetails) =>{
     return res;
 }
 
-const getReviewsOfAnArticle = async(code)=>{
+const getReviewContentOfAnArticle = async(code)=>{
     const sqlStatement = `Select B.MABAIBAO, B.PHANBIENSSN, NGAYPHANCONG, HANGOI, KETQUA, GHICHUBIENTAP, NOIDUNG 
-                        FROM PHANCONG P JOIN BAIPHANBIEN B ON P.MABAIBAO = B.MABAIBAO AND P.PHANBIENSSN = B.PHANBIENSSN
+                        FROM PHANCONG P LEFT JOIN BAIPHANBIEN B ON P.MABAIBAO = B.MABAIBAO AND P.PHANBIENSSN = B.PHANBIENSSN
                         WHERE B.MABAIBAO = '${code}';`;
 
     const table = await dbUtils.queryDatabase(config, sqlStatement, "", true);
@@ -180,12 +180,54 @@ const getReviewsOfAnArticle = async(code)=>{
         let result = [];
         const rows = table.rows;
         rows.forEach(row => {
-            result.push({code: row[0], reviewerSSN: row[1], assignDate: row[2], deadline: row[3], result: row[4], noteForEditor: row[5], content: row[6]});
+            result.push({code: row[0], reviewerSSN: row[1], assignDate: row[2], deadline: new Date(row[3]).toLocaleString(), result: row[4], noteForEditor: row[5], content: row[6]});
         });
         return result;
     }
     else
         return [];
+}
+
+const updateStateOfArticle = async(code, state, editorSSN)=>{
+    const procedureName = "UPDATE_TTXL_BAIBAO";
+
+    const params = {
+        "TTXL": state,
+        "MABAIBAO": code,
+        "BIENTAPSSN": editorSSN
+    }
+
+    const isSuccess = await dbUtils.execProcedure(config, procedureName, params, "");
+    return isSuccess;
+}
+
+const updateReviewResult = async (code, reviewerSSN, editorSSN, result) =>{
+    if(result !=='ChapNhanPhanBien' && result !=='TuChoiPhanBien')
+        return false;
+    
+    const procedureName = "UPDATE_KQPB_PC";
+    const params = {
+        "MABAIBAO": code,
+        "KQPB" : result,
+        "PHANBIENSSN": reviewerSSN,
+        "BIENTAPSSN": editorSSN
+    };
+
+    const isSucess = await dbUtils.execProcedure(config, procedureName, params, "");
+    return isSucess;
+}
+
+const updateArticleResult = async(code, editorSSN, result, notifyDate, note) =>{
+    const procedureName = "UPDATE_KQ_BAIBAO";
+    const params = {
+        "MABAIBAO": code,
+        "BIENTAPSSN": editorSSN,
+        "KQ": result,
+        "NGAYTHONGBAO": notifyDate, 
+        "CHITIETKHAC": note 
+    }
+
+    return (await dbUtils.execProcedure(config, procedureName, params, ""));
 }
 
 module.exports = {
@@ -197,5 +239,8 @@ module.exports = {
     getAllReviewerExceptMe: getAllReviewerExceptMe,
     updateReviewers: updateReviewers,
     getReviewersOfAnArticle: getReviewersOfAnArticle,
-    getReviewsOfAnArticle: getReviewsOfAnArticle
+    getReviewContentOfAnArticle: getReviewContentOfAnArticle,
+    updateStateOfArticle: updateStateOfArticle,
+    updateReviewResult: updateReviewResult,
+    updateArticleResult: updateArticleResult
 }

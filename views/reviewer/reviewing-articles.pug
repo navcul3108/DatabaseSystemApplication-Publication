@@ -1,0 +1,23 @@
+extends ../layout.pug
+
+block variables
+  -var title= "Các bài báo đang phản biện"
+
+block content
+  h3.text-primary Các bài báo mà bạn phản biện
+  table.table.table-striped
+    thead.thead-dark
+      th Mã bài báo
+      th Tiêu đề
+      th Ngày phân công
+      th Trạng thái
+      th Chi tiết
+    tbody
+      each article in articles
+        tr
+          td= article.code
+          td= article.title
+          td= article.assignDate
+          td= article.state
+          td
+            a.btn.btn-sm.btn-danger(href=`view-article-detail?code=${article.code}`) Chi tiết

@@ -22,4 +22,4 @@ block content
               td= profile.state
               td= profile.reviewerName? profile.reviewerName: 'Chưa có'
               td 
-                a.badge.badge-info(href=`article-detail?code=${profile.code}&currentRole=${currentRole}`) Chi tiết
+                a.badge.badge-info(href=`/author/view-article-detail?code=${profile.code}&currentRole=${currentRole}`) Chi tiết
