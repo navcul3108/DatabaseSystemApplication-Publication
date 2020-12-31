@@ -1,0 +1,36 @@
+extends ../layout.pug
+
+block variables
+  - var title = "Các bài báo đã xuất bản"
+
+block content
+        h4.font-weight-bold.text-success Các bài báo đã xuất bản
+        .row.mt-3
+            .col-md-3
+              .card
+                .card-header.bg-primary PPL
+                .card-body 
+                  h5.font-weight-bold Tác giả: Giang Văn Lực
+                .card-footer
+                  a.btn.btn-info Chi tiết
+            .col-md-3
+              .card
+                .card-header.bg-secondary Cơ sở dữ liệu
+                .card-body 
+                  h5.font-weight-bold Tác giả: Vũ Tùng Lâm
+                .card-footer
+                  a.btn.btn-info Chi tiết
+            .col-md-3
+              .card
+                .card-header.bg-info Machine Learning cơ bản
+                .card-body 
+                  h5.font-weight-bold Tác giả: Vũ Hưu Tiệp
+                .card-footer
+                  a.btn.btn-info Chi tiết
+            .col-md-3
+              .card
+                .card-header.bg-warning Phản biện sách ABC
+                .card-body 
+                  h5.font-weight-bold Tác giả: Nguyễn Anh Tuấn
+                .card-footer
+                  a.btn.btn-info Chi tiết

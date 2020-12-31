@@ -1,5 +1,14 @@
-$(document).on("ready", ()=>{
+$(document).ready(()=>{
+    $("#review-article .score").each((_,tdTag)=>{
+        console.log($(tdTag).parent().find("select"));
+        $(tdTag).text($(tdTag).parent().find("select").val());
+    })
 })
+
+function changeDescrition(select){
+    console.log($(select));
+    $(select).parent().siblings(".score").text($(select).val());
+}
 
 function enableEdit(btn){
     console.log($(btn).parent().siblings(".card-body"));

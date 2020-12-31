@@ -115,7 +115,7 @@ const getAllReviewingArticles = async(reviewerSSN)=>{
     {
         let articles = [];
         table.rows.forEach(row=>{
-            articles.push({code: row[0], title: row[1], assignDate: row[2], state: row[3]});
+            articles.push({code: row[0], title: row[1], assignDate: new Date(row[2]).toLocaleString(), state: row[3]});
         })
         return articles;
     }

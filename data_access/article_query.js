@@ -162,7 +162,7 @@ const viewPostedArticle = async (ssn) =>{
     return [];
 }
 
-const getArticle = async (code)=>{
+const getArticle = async (code, userId)=>{
     let config = dbUtils.config;
     let login = dbUtils.databaseLogin["Tác giả"];
     config.user = login.user;
@@ -177,7 +177,7 @@ const getArticle = async (code)=>{
             title: row[1],
             brief: row[2],
             fileName: row[3],
-            filePath: row[4]+'/'+row[3],
+            filePath: (userId? userId: '')+'/'+row[3],
             editorSSN: row[5],
             state: row[9],
             result: row[10],
@@ -215,13 +215,13 @@ const getReview = async(code, reviewerSSN=null)=>{
     if(table.rows.length>0){
         if(reviewerSSN){
             const row = table.rows[0];
-            return {code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: row[6], result: row[7]}    
+            return {code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: new Date(row[6]).toLocaleString(), result: row[7]}    
         }
         else{
             let result = [];
             const rows = table.rows;
             rows.forEach(row => {
-                result.push({code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: row[6], result: row[7]});
+                result.push({code: row[0], reviewerSSN: row[1], noteForEditor: row[2], noteForAuthor: row[3], content: row[4], sendingDate: row[5], deadline: new Date(row[6]).toLocaleString(), result: row[7]});
             });
             return result;
         }
@@ -230,8 +230,8 @@ const getReview = async(code, reviewerSSN=null)=>{
         return null;    
 }
 
-const getFullProfileOfArticle = async (code) =>{
-    const detail = await getArticle(code);
+const getFullProfileOfArticle = async (code, userId=null) =>{
+    const detail = await getArticle(code, userId);
     if(!detail){
         return null;
     }

@@ -109,7 +109,7 @@ router.get("/view-article-detail", async (req, res)=>{
         res.render("error", {message: "Truy vấn không hợp lệ"});
         return;
     }
-    const fullProfile = await articleQuery.getFullProfileOfArticle(code);
+    const fullProfile = await articleQuery.getFullProfileOfArticle(code, req.session.user.id);
 
     let isContactAuthor = fullProfile.detail.contactSsn == req.session.ssn;
 

@@ -139,4 +139,8 @@ router.get("/article-detail", async (req, res)=>{
     res.render("article/article-detail", data);
 })
 
+router.get("/public-articles", (_, res)=>{
+    res.render("users/public-articles");
+})
+
 module.exports = router;

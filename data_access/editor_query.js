@@ -113,7 +113,7 @@ const getReviewersOfAnArticle = async (code)=>{
     {
         let reviewerDetail = [];
         table.rows.forEach(row=>{
-            reviewerDetail.push({ssn: row[0], fullName: row[1], deadline: row[2]});
+            reviewerDetail.push({ssn: row[0], fullName: row[1], deadline: new Date(row[2]).toISOString()});
         });
         return reviewerDetail;
     }

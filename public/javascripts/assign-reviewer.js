@@ -2,8 +2,12 @@ $(document).ready(()=>{
     $("#tempateDeadline").prop("min", getCurrentDate());
     $("#templateSelect").hide();
     $("#tempateDeadline").val(getCurrentDate());
-    $(".deadline").val(getCurrentDate());
-    $(".deadline").prop("min" ,getCurrentDate());
+    $(".deadline").each((_, inputTag)=>{
+        if($(inputTag).val()==null){
+            $(inputTag).val(getCurrentDate());
+        }
+        $(inputTag).prop("min", getCurrentDate());    
+    })
 })
 function addReviewer(){
     if($("select").length==1){
@@ -56,8 +60,18 @@ function enableSubmit(){
 }
 
 function beforeSubmit(){
-    $("form").append($('input[name="code"]').clone());
-    return true;
+    let ssns = [];
+    let isValid = true;
+    console.log($('select:not(:disabled)'));
+    $('select:not(:disabled)').each((_, selectTag)=>{
+        if(ssn.length>0 && ssns.some(ssn == $(selectTag).val())){
+            alert("Các tác giả ko được trùng tên nhau");
+            isValid = false;
+            return false;
+        }
+        ssns.push($(selectTag).val());
+    })
+    return isValid;
 }
 
 function getCurrentDate(){

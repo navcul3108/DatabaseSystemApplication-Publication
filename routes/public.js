@@ -9,6 +9,8 @@ router.get("/articleFile", (req, res)=>{
     const filePath = req.query.filePath;
     if(fs.existsSync(`./public/articles/${filePath}`))
         res.sendFile(path.join(global.approot+ `/public/articles/${filePath}`));
+    else
+        res.render("error", {message: "Không tồn tại file này"});
 })
 
 module.exports = router;

@@ -3,7 +3,7 @@ mixin review-content-partial(currentRole, reviewerSSN, detail, allCriterias, rev
     .card-header.bg-success
       h4.text-white.d-inline-block Kết quả phản biện
     .card-body
-      if currentRole=='reviewer'
+      if currentRole=='reviewer' && reviewContent
         .card.w-100
           .card-header.bg-secondary
             | Phản biện SSN: #{reviewerSSN}
@@ -11,7 +11,7 @@ mixin review-content-partial(currentRole, reviewerSSN, detail, allCriterias, rev
               button.btn.btn-danger.d-inline-block.float-right(type='button' onclick='enableEdit(this)') Edit
           .card-body
             .m-3
-              h5 Hạn nộp #{detail.deadline}
+              h5 Hạn nộp #{reviewContent.deadline}
             if isEditable
               form(action="/reviewer/update-review-content" method="post" id="review-article")
                 // Bảng chấm điểm
@@ -25,13 +25,13 @@ mixin review-content-partial(currentRole, reviewerSSN, detail, allCriterias, rev
                       tr
                         td= criteria.content
                         td
-                          select(name=`${criteria.content}` disabled)
+                          select(name=`${criteria.content}` disabled onchange="changeDescrition(this)")
                             each val, _ in criteria.details
                               if val.selected
                                 option(value=`${val.score}` selected)= val.description
                               else
                                 option(value=`${val.score}`)= val.description
-                        td 10
+                        td.score 
 
                 input(type="hidden" name="code" value=`${detail.code}`)
                 .form-group

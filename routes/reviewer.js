@@ -31,7 +31,7 @@ router.get("/view-article-detail", async (req, res)=>{
         return;
     }
 
-    const fullProfile = await articleQuery.getFullProfileOfArticle(code);
+    const fullProfile = await articleQuery.getFullProfileOfArticle(code, req.session.user.id);
 
     if(!fullProfile.editorProfile.ssn)
     {
